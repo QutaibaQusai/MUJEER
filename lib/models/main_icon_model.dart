@@ -1,4 +1,4 @@
-import 'package:ERPForever/models/header_icon_model.dart';
+import 'package:MUJEER/models/header_icon_model.dart';
 
 class MainIconModel {
   final String title;

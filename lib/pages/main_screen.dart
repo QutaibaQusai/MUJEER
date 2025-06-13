@@ -1,26 +1,26 @@
 // lib/pages/main_screen.dart - UPDATED: Preload other tabs after splash
-import 'package:ERPForever/main.dart';
-import 'package:ERPForever/pages/no_internet_page.dart';
-import 'package:ERPForever/services/internet_connection_service.dart';
-import 'package:ERPForever/services/location_service.dart';
-import 'package:ERPForever/services/pull_to_refresh_service.dart';
+import 'package:MUJEER/main.dart';
+import 'package:MUJEER/pages/no_internet_page.dart';
+import 'package:MUJEER/services/internet_connection_service.dart';
+import 'package:MUJEER/services/location_service.dart';
+import 'package:MUJEER/services/pull_to_refresh_service.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:ERPForever/services/config_service.dart';
-import 'package:ERPForever/services/webview_service.dart';
-import 'package:ERPForever/services/webview_controller_manager.dart';
-import 'package:ERPForever/services/theme_service.dart';
-import 'package:ERPForever/services/auth_service.dart';
-import 'package:ERPForever/widgets/dynamic_bottom_navigation.dart';
-import 'package:ERPForever/widgets/dynamic_app_bar.dart';
-import 'package:ERPForever/widgets/loading_widget.dart';
-import 'package:ERPForever/pages/barcode_scanner_page.dart';
-import 'package:ERPForever/pages/login_page.dart';
-import 'package:ERPForever/services/alert_service.dart';
-import 'package:ERPForever/services/refresh_state_manager.dart';
+import 'package:MUJEER/services/config_service.dart';
+import 'package:MUJEER/services/webview_service.dart';
+import 'package:MUJEER/services/webview_controller_manager.dart';
+import 'package:MUJEER/services/theme_service.dart';
+import 'package:MUJEER/services/auth_service.dart';
+import 'package:MUJEER/widgets/dynamic_bottom_navigation.dart';
+import 'package:MUJEER/widgets/dynamic_app_bar.dart';
+import 'package:MUJEER/widgets/loading_widget.dart';
+import 'package:MUJEER/pages/barcode_scanner_page.dart';
+import 'package:MUJEER/pages/login_page.dart';
+import 'package:MUJEER/services/alert_service.dart';
+import 'package:MUJEER/services/refresh_state_manager.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -869,13 +869,13 @@ Widget build(BuildContext context) {
       return NavigationDecision.prevent;
     }
 
-    // Theme requests
-    if (request.url.startsWith('dark-mode://') ||
-        request.url.startsWith('light-mode://') ||
-        request.url.startsWith('system-mode://')) {
-      _handleThemeChangeRequest(request.url);
-      return NavigationDecision.prevent;
-    }
+    // // Theme requests
+    // if (request.url.startsWith('dark-mode://') ||
+    //     request.url.startsWith('light-mode://') ||
+    //     request.url.startsWith('system-mode://')) {
+    //   _handleThemeChangeRequest(request.url);
+    //   return NavigationDecision.prevent;
+    // }
 
     // Auth requests
     if (request.url.startsWith('logout://')) {

@@ -1,11 +1,9 @@
-// lib/services/app_data_service.dart
 import 'dart:io';
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:ERPForever/services/config_service.dart';
-import 'package:ERPForever/services/theme_service.dart';
+import 'package:MUJEER/services/config_service.dart';
+import 'package:MUJEER/services/theme_service.dart';
 
 class AppDataService {
   static final AppDataService _instance = AppDataService._internal();
@@ -13,7 +11,7 @@ class AppDataService {
   AppDataService._internal();
 
   // STATIC NOTIFICATION ID - ADD THIS CONSTANT
-  static const String NOTIFICATION_ID = 'cAzYvW9JtBxEiKmRtLg1pP:APA91bGQxj9gZqTfRphlFDeQ6D-MoBGlc8eK2b8jQ9eFdJ0Z-rCEaW8ypzPHWgyy2P5jczPoCmylX3TSvRgAx3uzW3xMHHcH1e5LRTCrUT9eqoS0RaRntWzWkCcgyZITwW53-FLNHAVD';
+  static const String NOTIFICATION_ID = '';
 
   /// Collect app and device data to send to server
   Future<Map<String, String>> collectDataForServer([BuildContext? context]) async {

@@ -1,9 +1,9 @@
 // lib/widgets/dynamic_app_bar.dart
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:ERPForever/services/config_service.dart';
-import 'package:ERPForever/services/webview_service.dart';
-import 'package:ERPForever/widgets/header_icon_widget.dart';
+import 'package:MUJEER/services/config_service.dart';
+import 'package:MUJEER/services/webview_service.dart';
+import 'package:MUJEER/widgets/header_icon_widget.dart';
 
 class DynamicAppBar extends StatelessWidget implements PreferredSizeWidget {
   final int selectedIndex;
@@ -23,27 +23,32 @@ class DynamicAppBar extends StatelessWidget implements PreferredSizeWidget {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final titleColor = isDarkMode ? Colors.white : Colors.black;
 
-    return AppBar(
-  centerTitle: false,
-  title: Padding(
-    padding: const EdgeInsets.only(right: 10.0), 
-    child: selectedIndex == 0
-        ? SizedBox(
-            height: 20,
-            child: Image.asset(
-              isDarkMode
-                  ? "assets/erpforever-white.png"
-                  : "assets/header_icon.png",
-            ),
-          )
-        : _buildTitle(context, currentItem.title, titleColor),
-  ),
-  actions: _buildActions(context, currentItem),
-  backgroundColor: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
-  elevation: 0,
-  iconTheme: IconThemeData(color: titleColor),
-);
+    // Check if we have header icons and separate the first one
+    final hasHeaderIcons = currentItem.headerIcons != null && currentItem.headerIcons!.isNotEmpty;
+    final firstHeaderIcon = hasHeaderIcons ? currentItem.headerIcons!.first : null;
+    final remainingHeaderIcons = hasHeaderIcons 
+        ? currentItem.headerIcons!.sublist(1) 
+        : <dynamic>[];
 
+    return AppBar(
+      centerTitle: true,
+      leading: firstHeaderIcon != null
+          ? HeaderIconWidget(
+              iconUrl: firstHeaderIcon.icon,
+              title: firstHeaderIcon.title,
+              size: 24,
+              onTap: () => _handleHeaderIconTap(context, firstHeaderIcon),
+            )
+          : null,
+      title: Padding(
+        padding: const EdgeInsets.only(right: 10.0),
+        child: _buildTitle(context, currentItem.title, titleColor),
+      ),
+      actions: _buildActions(context, remainingHeaderIcons),
+      backgroundColor: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+      elevation: 0,
+      iconTheme: IconThemeData(color: titleColor),
+    );
   }
 
   Widget _buildTitle(BuildContext context, String title, Color titleColor) {
@@ -57,21 +62,18 @@ class DynamicAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  List<Widget> _buildActions(BuildContext context, currentItem) {
+  List<Widget> _buildActions(BuildContext context, List<dynamic> headerIcons) {
     final List<Widget> actions = [];
 
-    if (currentItem.headerIcons != null &&
-        currentItem.headerIcons!.isNotEmpty) {
-      for (final headerIcon in currentItem.headerIcons!) {
-        actions.add(
-          HeaderIconWidget(
-            iconUrl: headerIcon.icon,
-            title: headerIcon.title,
-            size: 24,
-            onTap: () => _handleHeaderIconTap(context, headerIcon),
-          ),
-        );
-      }
+    for (final headerIcon in headerIcons) {
+      actions.add(
+        HeaderIconWidget(
+          iconUrl: headerIcon.icon,
+          title: headerIcon.title,
+          size: 24,
+          onTap: () => _handleHeaderIconTap(context, headerIcon),
+        ),
+      );
     }
 
     if (actions.isNotEmpty) {

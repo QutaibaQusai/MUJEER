@@ -1,10 +1,10 @@
 // lib/widgets/dynamic_sheet_controller.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart'; 
-import 'package:ERPForever/services/config_service.dart';
-import 'package:ERPForever/services/webview_service.dart';
-import 'package:ERPForever/services/refresh_state_manager.dart'; 
-import 'package:ERPForever/widgets/sheet_modal.dart';
+import 'package:MUJEER/services/config_service.dart';
+import 'package:MUJEER/services/webview_service.dart';
+import 'package:MUJEER/services/refresh_state_manager.dart'; 
+import 'package:MUJEER/widgets/sheet_modal.dart';
 
 class DynamicSheetController {
   static void showSheetFromConfig(

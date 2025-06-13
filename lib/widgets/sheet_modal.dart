@@ -1,10 +1,10 @@
 // lib/widgets/sheet_modal.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart'; // ADD THIS IMPORT
-import 'package:ERPForever/services/config_service.dart';
-import 'package:ERPForever/services/webview_service.dart';
-import 'package:ERPForever/services/refresh_state_manager.dart'; // ADD THIS IMPORT
-import 'package:ERPForever/widgets/sheet_action_item.dart';
+import 'package:MUJEER/services/config_service.dart';
+import 'package:MUJEER/services/webview_service.dart';
+import 'package:MUJEER/services/refresh_state_manager.dart'; // ADD THIS IMPORT
+import 'package:MUJEER/widgets/sheet_action_item.dart';
 
 class SheetModal extends StatefulWidget {
   const SheetModal({super.key});

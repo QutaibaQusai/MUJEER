@@ -1,13 +1,10 @@
-// lib/widgets/dynamic_bottom_navigation.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
-import 'package:provider/provider.dart'; // ADD THIS IMPORT
-import 'package:ERPForever/services/config_service.dart';
-import 'package:ERPForever/services/webview_service.dart';
-import 'package:ERPForever/services/refresh_state_manager.dart'; // ADD THIS IMPORT
-import 'package:ERPForever/widgets/dynamic_navigation_icon.dart';
-import 'package:ERPForever/widgets/dynamic_icon.dart';
+import 'package:google_nav_bar/google_nav_bar.dart';
+
+import 'package:MUJEER/services/config_service.dart';
+import 'package:MUJEER/services/webview_service.dart';
+import 'package:MUJEER/widgets/dynamic_navigation_icon.dart';
 
 class DynamicBottomNavigation extends StatelessWidget {
   final int selectedIndex;
@@ -26,106 +23,104 @@ class DynamicBottomNavigation extends StatelessWidget {
 
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
-    return BottomAppBar(
-      color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
-      elevation: 8,
-      height: 75,
-      padding: EdgeInsets.zero,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: _buildNavigationItems(context, config, isDarkMode),
+    final primaryColor = getColorFromHex(config.theme.primaryColor);
+    debugPrint('$primaryColor ');
+
+    final inactiveColor = isDarkMode ? Colors.grey[400]! : Colors.grey[600]!;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8),
+          child: GNav(
+            rippleColor: isDarkMode ? Colors.grey[800]! : Colors.grey[300]!,
+            hoverColor: isDarkMode ? Colors.grey[700]! : Colors.grey[100]!,
+            haptic: true,
+            tabBorderRadius: 25,
+            tabActiveBorder: Border.all(color: primaryColor, width: 1),
+            tabBorder: Border.all(color: Colors.transparent, width: 1),
+            curve: Curves.easeIn,
+            duration: const Duration(milliseconds: 200),
+            gap: 8,
+            color: inactiveColor,
+            activeColor: primaryColor,
+            iconSize: 24,
+            tabBackgroundColor: primaryColor.withOpacity(0.2),
+            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+            selectedIndex: selectedIndex,
+            onTabChange: (index) {
+              HapticFeedback.lightImpact();
+              final item = config.mainIcons[index];
+              _onItemTapped(context, index, item);
+            },
+            tabs: _buildNavigationTabs(
+              context,
+              config,
+              primaryColor,
+              inactiveColor,
+            ),
+          ),
+        ),
       ),
     );
   }
 
-  List<Widget> _buildNavigationItems(
-    BuildContext context,
-    config,
-    bool isDarkMode,
-  ) {
-    List<Widget> items = [];
-
-    for (int i = 0; i < config.mainIcons.length; i++) {
-      if (i == 2 && config.sheetIcons.isNotEmpty) {
-        items.add(_buildCenterAddButton(context, isDarkMode));
+  Color getColorFromHex(String hexColor) {
+    try {
+      String cleaned = hexColor.trim().toUpperCase().replaceAll('#', '');
+      if (cleaned.length == 6) {
+        cleaned = 'FF$cleaned'; 
       }
-
-      items.add(_buildNavItem(context, i, config.mainIcons[i], isDarkMode));
+      return Color(int.parse('0x$cleaned'));
+    } catch (e) {
+      debugPrint('❌ Invalid hex color: $hexColor. Error: $e');
+      return const Color(0xFFFF0000); 
     }
-
-    return items;
   }
 
-  Widget _buildNavItem(BuildContext context, int index, item, bool isDarkMode) {
-    final isSelected = selectedIndex == index;
-    final Color iconColor =
-        isSelected
-            ? Colors.blue
-            : (isDarkMode ? Colors.grey[400]! : Colors.grey);
-
-    return Expanded(
-      child: InkWell(
-        splashColor: Colors.transparent,
-        highlightColor: Colors.transparent,
-        onTap: () {
-          HapticFeedback.lightImpact();
-          _onItemTapped(context, index, item);
-        },
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            DynamicNavigationIcon(
-              iconLineUrl: item.iconLine,
-              iconSolidUrl: item.iconSolid,
-              isSelected: isSelected,
-              size: 24,
-              selectedColor: Colors.blue,
-              unselectedColor: isDarkMode ? Colors.grey[400] : Colors.grey,
-            ),
-            const SizedBox(height: 2),
-            Text(
-              item.title,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: iconColor,
-              ),
-            ),
-          ],
+  List<GButton> _buildNavigationTabs(
+    BuildContext context,
+    dynamic config,
+    Color primaryColor,
+    Color inactiveColor,
+  ) {
+    return List.generate(
+      config.mainIcons.length,
+      (index) => GButton(
+        icon: Icons.circle,
+        text: config.mainIcons[index].title,
+        leading: SizedBox(
+          width: 24,
+          height: 24,
+          child: DynamicNavigationIcon(
+            iconLineUrl: config.mainIcons[index].iconLine,
+            iconSolidUrl: config.mainIcons[index].iconSolid,
+            isSelected: selectedIndex == index,
+            size: 24,
+            selectedColor: primaryColor,
+            unselectedColor: inactiveColor,
+          ),
+        ),
+        textStyle: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: primaryColor,
         ),
       ),
     );
   }
 
-  Widget _buildCenterAddButton(BuildContext context, bool isDarkMode) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => _showAddOptions(context),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                color: isDarkMode ? Colors.white : Colors.black,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.add,
-                color: isDarkMode ? Colors.black : Colors.white,
-                size: 30,
-              ),
-            ),
-            const SizedBox(height: 2),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _onItemTapped(BuildContext context, int index, item) {
+  void _onItemTapped(BuildContext context, int index, dynamic item) {
     if (item.linkType == 'sheet_webview') {
       WebViewService().navigate(
         context,
@@ -135,199 +130,6 @@ class DynamicBottomNavigation extends StatelessWidget {
       );
     } else {
       onItemTapped(index);
-    }
-  }
-
-  void _showAddOptions(BuildContext context) {
-    final config = ConfigService().config;
-    if (config == null || config.sheetIcons.isEmpty) return;
-
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
-    HapticFeedback.mediumImpact();
-
-    // NOTIFY REFRESH MANAGER THAT SHEET IS OPENING
-    final refreshManager = Provider.of<RefreshStateManager>(
-      context,
-      listen: false,
-    );
-    refreshManager.setSheetOpen(true);
-    debugPrint(
-      '📋 DynamicBottomNavigation sheet opening - background refresh/scroll DISABLED',
-    );
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      // ADD isDismissible to handle swipe-to-close
-      isDismissible: true,
-      // ADD enableDrag to handle drag-to-close
-      enableDrag: true,
-      builder:
-          (context) => Container(
-            decoration: BoxDecoration(
-              color: isDarkMode ? Colors.black : Colors.white,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(20),
-                topRight: Radius.circular(20),
-              ),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SizedBox(height: 20),
-                _buildSheetActionsGrid(context, config, isDarkMode),
-                const SizedBox(height: 30),
-                GestureDetector(
-                  onTap: () {
-                    // NOTIFY REFRESH MANAGER THAT SHEET IS CLOSING
-                    refreshManager.setSheetOpen(false);
-                    debugPrint(
-                      '📋 DynamicBottomNavigation sheet closing via close button - background refresh/scroll ENABLED',
-                    );
-                    Navigator.pop(context);
-                  },
-                  child: Container(
-                    width: 50,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: isDarkMode ? Colors.white : Colors.black,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.close,
-                      color: isDarkMode ? Colors.black : Colors.white,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 30),
-              ],
-            ),
-          ),
-    ).then((_) {
-      // HANDLE SHEET CLOSING BY ANY METHOD (swipe, tap outside, back button)
-      refreshManager.setSheetOpen(false);
-      debugPrint(
-        '📋 DynamicBottomNavigation sheet closed - background refresh/scroll ENABLED',
-      );
-    });
-  }
-
-  Widget _buildSheetActionsGrid(BuildContext context, config, bool isDarkMode) {
-    final sheetIcons = config.sheetIcons;
-
-    // Create rows with maximum 3 items each
-    final List<Widget> rows = [];
-    for (int i = 0; i < sheetIcons.length; i += 3) {
-      final rowItems = sheetIcons.skip(i).take(3).toList();
-      rows.add(
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children:
-                rowItems
-                    .map<Widget>(
-                      (item) => Expanded(
-                        child: _buildDynamicActionButton(
-                          context,
-                          item,
-                          isDarkMode,
-                        ),
-                      ),
-                    )
-                    .toList(),
-          ),
-        ),
-      );
-    }
-
-    return Column(children: rows);
-  }
-
-  Widget _buildDynamicActionButton(
-    BuildContext context,
-    item,
-    bool isDarkMode,
-  ) {
-    return Column(
-      children: [
-        GestureDetector(
-          onTap: () {
-            // NOTIFY REFRESH MANAGER THAT SHEET IS CLOSING
-            final refreshManager = Provider.of<RefreshStateManager>(
-              context,
-              listen: false,
-            );
-            refreshManager.setSheetOpen(false);
-            debugPrint(
-              '📋 DynamicBottomNavigation sheet closing via action button - background refresh/scroll ENABLED',
-            );
-
-            Navigator.pop(context);
-
-            // Navigate to the selected item
-            WebViewService().navigate(
-              context,
-              url: item.link,
-              linkType: item.linkType,
-              title: item.title,
-            );
-          },
-          child: Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: Colors.grey.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: Center(
-              child: DynamicIcon(
-                iconUrl: item.iconSolid,
-                size: 28,
-                color: Colors.grey,
-                showLoading: false,
-                fallbackIcon: Icon(
-                  _getIconForTitle(item.title),
-                  color: Colors.grey,
-                  size: 28,
-                ),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          item.title,
-          style: TextStyle(
-            fontWeight: FontWeight.w500,
-            fontSize: 12,
-            color: isDarkMode ? Colors.white : Colors.black,
-          ),
-          textAlign: TextAlign.center,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
-    );
-  }
-
-  IconData _getIconForTitle(String title) {
-    switch (title.toLowerCase()) {
-      case 'status':
-      case 'sheet first':
-        return FluentIcons.document_16_regular;
-      case 'time log':
-      case 'timelog':
-      case 'sheet second':
-        return FluentIcons.clock_16_regular;
-      case 'leave':
-      case 'sheet third':
-        return FluentIcons.weather_partly_cloudy_day_16_regular;
-      case 'sheet fourth':
-        return FluentIcons.apps_16_regular;
-      default:
-        return FluentIcons.circle_16_regular;
     }
   }
 }

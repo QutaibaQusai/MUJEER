@@ -1,6 +1,6 @@
 // lib/widgets/header_icon_widget.dart
 import 'package:flutter/material.dart';
-import 'package:ERPForever/widgets/dynamic_icon.dart';
+import 'package:MUJEER/widgets/dynamic_icon.dart';
 
 class HeaderIconWidget extends StatelessWidget {
   final String iconUrl;

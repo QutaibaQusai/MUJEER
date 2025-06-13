@@ -1,0 +1,12 @@
+flutter_native_splash:
+  color: "#000000"
+  image: assets/MUJEER_SPLASH_IOS.png
+  android: true
+  ios: true
+  fullscreen: true
+  android_gravity: center
+  ios_content_mode: center
+
+  android_12:
+    image: assets/splach2.png
+    color: "#0078d7"

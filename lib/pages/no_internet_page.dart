@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:ERPForever/services/internet_connection_service.dart';
-import 'package:ERPForever/pages/main_screen.dart';
+import 'package:MUJEER/services/internet_connection_service.dart';
+import 'package:MUJEER/pages/main_screen.dart';
 
 class NoInternetPage extends StatefulWidget {
   const NoInternetPage({super.key});

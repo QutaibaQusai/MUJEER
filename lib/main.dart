@@ -1,18 +1,18 @@
 // lib/main.dart - COMPLETE: Enhanced with offline handling
-import 'package:ERPForever/services/refresh_state_manager.dart';
-import 'package:ERPForever/themes/dynamic_theme.dart';
-import 'package:ERPForever/widgets/connection_status_widget.dart';
-import 'package:ERPForever/widgets/screenshot_wrapper.dart';
+import 'package:MUJEER/services/refresh_state_manager.dart';
+import 'package:MUJEER/themes/dynamic_theme.dart';
+import 'package:MUJEER/widgets/connection_status_widget.dart';
+import 'package:MUJEER/widgets/screenshot_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'package:ERPForever/services/config_service.dart';
-import 'package:ERPForever/services/theme_service.dart';
-import 'package:ERPForever/services/auth_service.dart';
-import 'package:ERPForever/pages/main_screen.dart';
-import 'package:ERPForever/pages/login_page.dart';
-import 'package:ERPForever/pages/no_internet_page.dart';
-import 'package:ERPForever/services/internet_connection_service.dart';
+import 'package:MUJEER/services/config_service.dart';
+import 'package:MUJEER/services/theme_service.dart';
+import 'package:MUJEER/services/auth_service.dart';
+import 'package:MUJEER/pages/main_screen.dart';
+import 'package:MUJEER/pages/login_page.dart';
+import 'package:MUJEER/pages/no_internet_page.dart';
+import 'package:MUJEER/services/internet_connection_service.dart';
 
 void main() async {
   // Preserve the native splash screen
