@@ -9,7 +9,7 @@
 
     
     <application
-        android:label="ERPForever"
+        android:label="MUJEER"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         <activity
