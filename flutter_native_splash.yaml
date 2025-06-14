@@ -8,5 +8,5 @@ flutter_native_splash:
   ios_content_mode: center
 
   android_12:
-    image: assets/splach2.png
-    color: "#0078d7"
+    image: assets\MUJEER_SPLASH_Android.png
+    color: "#000000"
