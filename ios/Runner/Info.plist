@@ -15,14 +15,14 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>zoho_clone</string>
+	<string>MUJEER</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
-	<key>CFBundleURLTypes</key>
+	<!-- <key>CFBundleURLTypes</key>
 	<array>
 		<dict>
 			<key>CFBundleURLName</key>
@@ -31,46 +31,46 @@
 			<array>
 				<string>loggedin</string>
 			</array>
-		</dict>
-	</array>
+		</dict>	
+	</array> -->
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>ERPForever needs Bluetooth access to connect to business devices such as barcode scanners, printers, and other peripheral devices.</string>
+	<string>MUJEER needs Bluetooth access to connect to business devices such as barcode scanners, printers, and other peripheral devices.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
-	<string>ERPForever needs Bluetooth access to communicate with business peripherals and devices for enhanced ERP functionality.</string>
+	<string>MUJEER needs Bluetooth access to communicate with business peripherals and devices for enhanced MUJEER functionality.</string>
 	<key>NSCalendarsUsageDescription</key>
-	<string>ERPForever needs calendar access to schedule meetings, track appointments, and manage business events within your ERP workflow.</string>
+	<string>MUJEER needs calendar access to schedule meetings, track appointments, and manage business events within your MUJEER workflow.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>ERPForever needs camera access to scan barcodes, QR codes, and capture business documents. This helps you quickly input data and manage inventory.</string>
+	<string>MUJEER needs camera access to scan barcodes, QR codes, and capture business documents. This helps you quickly input data and manage inventory.</string>
 	<key>NSContactsUsageDescription</key>
-	<string>ERPForever needs access to your contacts to help you quickly select and manage business contacts, import customer information, and streamline communication workflows in your ERP system.</string>
+	<string>MUJEER needs access to your contacts to help you quickly select and manage business contacts, import customer information, and streamline communication workflows in your MUJEER system.</string>
 	<key>NSDocumentsFolderUsageDescription</key>
-	<string>ERPForever needs access to documents to import and export business files, reports, and data for your ERP operations.</string>
+	<string>MUJEER needs access to documents to import and export business files, reports, and data for your MUJEER operations.</string>
 	<key>NSFaceIDUsageDescription</key>
-	<string>ERPForever uses Face ID to provide secure and convenient access to your business data and sensitive ERP information.</string>
+	<string>MUJEER uses Face ID to provide secure and convenient access to your business data and sensitive MUJEER information.</string>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>ERPForever needs access to your local network to connect to local servers, printers, and other business devices on your network.</string>
+	<string>MUJEER needs access to your local network to connect to local servers, printers, and other business devices on your network.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>ERPForever needs location access to provide comprehensive location-based business services including background location tracking for work hours and automated location-based check-ins.</string>
+	<string>MUJEER needs location access to provide comprehensive location-based business services including background location tracking for work hours and automated location-based check-ins.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>ERPForever needs location access to provide location-based features such as tracking work locations, finding nearby offices, and location-based time tracking for business operations.</string>
+	<string>MUJEER needs location access to provide location-based features such as tracking work locations, finding nearby offices, and location-based time tracking for business operations.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>ERPForever may need microphone access for voice notes, audio recording of meetings, and voice-to-text features to enhance your business productivity.</string>
+	<string>MUJEER may need microphone access for voice notes, audio recording of meetings, and voice-to-text features to enhance your business productivity.</string>
 	<key>NSMotionUsageDescription</key>
-	<string>ERPForever needs motion access to track work-related activities and provide insights into your business productivity patterns.</string>
+	<string>MUJEER needs motion access to track work-related activities and provide insights into your business productivity patterns.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>ERPForever needs permission to save screenshots, business documents, reports, and images to your photo library for easy access and sharing of important business information.</string>
+	<string>MUJEER needs permission to save screenshots, business documents, reports, and images to your photo library for easy access and sharing of important business information.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>ERPForever needs access to your photo library to save and manage business documents, screenshots, reports, and images. This allows you to organize and share important business information.</string>
+	<string>MUJEER needs access to your photo library to save and manage business documents, screenshots, reports, and images. This allows you to organize and share important business information.</string>
 	<key>NSRemindersUsageDescription</key>
-	<string>ERPForever needs access to reminders to help you manage tasks, deadlines, and business reminders integrated with your ERP system.</string>
+	<string>MUJEER needs access to reminders to help you manage tasks, deadlines, and business reminders integrated with your MUJEER system.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>ERPForever needs speech recognition access to provide voice-to-text features for faster data entry and voice commands in your business workflow.</string>
+	<string>MUJEER needs speech recognition access to provide voice-to-text features for faster data entry and voice commands in your business workflow.</string>
 	<key>NSUserTrackingUsageDescription</key>
-	<string>ERPForever would like to track your activity across other companies' apps and websites to provide better analytics and improve your business experience.</string>
+	<string>MUJEER would like to track your activity across other companies' apps and websites to provide better analytics and improve your business experience.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

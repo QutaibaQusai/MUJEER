@@ -2035,7 +2035,6 @@ createBlackToast: function(message) {
       
       // Auth System
       logout: function() {
-        console.log('🚪 Logging out...');
         if (window.AuthManager) {
           window.AuthManager.postMessage('logout');
         } else {

@@ -191,7 +191,6 @@ function detectCurrentTheme() {
                          !isActivelyScrolling &&
                          maxContainerScroll === 0;
           
-          // Enhanced logging for main screen (same as sheet)
           if (!result && isMainScreen && tabIndex === 0) {
             console.log('📍 Main Screen tab ' + tabIndex + ' NOT at top (ENHANCED):', {
               scrollTop: scrollTop,

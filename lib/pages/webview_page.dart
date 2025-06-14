@@ -576,7 +576,6 @@ class _WebViewPageState extends State<WebViewPage> {
       
       // Auth System
       logout: function() {
-        console.log('🚪 Logging out...');
         if (window.AuthManager) {
           window.AuthManager.postMessage('logout');
         } else {
@@ -722,16 +721,9 @@ class _WebViewPageState extends State<WebViewPage> {
       return NavigationDecision.prevent;
     }
 
-    // For loggedin:// requests, also prevent to avoid issues
-    if (request.url.startsWith('loggedin://')) {
-      debugPrint(
-        '🔐 Login success detected in WebViewPage - but user is already logged in',
-      );
-      return NavigationDecision.prevent;
-    }
+   
 
     if (
-        request.url.startsWith('logout://') ||
         request.url.startsWith('get-location://') ||
         request.url.startsWith('get-contacts://') ||
         request.url.startsWith('take-screenshot://') ||

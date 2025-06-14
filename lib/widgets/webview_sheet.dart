@@ -177,21 +177,13 @@ class _WebViewSheetState extends State<WebViewSheet> {
       _handleToastRequest(request.url);
       return NavigationDecision.prevent;
     }
-    // Handle new-sheet:// requests
     if (request.url.startsWith('new-sheet://')) {
       _handleSheetNavigation(request.url);
       return NavigationDecision.prevent;
     }
 
-    // For loggedin:// requests, also prevent to avoid issues
-    if (request.url.startsWith('loggedin://')) {
-      debugPrint(
-        '🔐 Login success detected in WebViewSheet - but user is already logged in',
-      );
-      return NavigationDecision.prevent;
-    }
+   
 
-    // For all service-related URLs, prevent navigation (they'll be handled by JavaScript)
     if (request.url.startsWith('dark-mode://') ||
         request.url.startsWith('light-mode://') ||
         request.url.startsWith('system-mode://') ||
@@ -884,7 +876,6 @@ class _WebViewSheetState extends State<WebViewSheet> {
       
       // Auth System
       logout: function() {
-        console.log('🚪 Logging out...');
         if (window.AuthManager) {
           window.AuthManager.postMessage('logout');
         } else {
