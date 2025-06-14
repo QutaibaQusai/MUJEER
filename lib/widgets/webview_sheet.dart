@@ -160,7 +160,6 @@ class _WebViewSheetState extends State<WebViewSheet> {
 
   // ADD THIS METHOD - Same as WebViewPage
   NavigationDecision _handleNavigationRequest(NavigationRequest request) {
-    debugPrint('🔍 Handling navigation in WebViewPage: ${request.url}');
 
     // PRIORITY: Handle external URLs with ?external=1 parameter
     if (request.url.contains('?external=1')) {
@@ -212,7 +211,6 @@ class _WebViewSheetState extends State<WebViewSheet> {
     try {
       // Extract message from the URL
       String message = url.replaceFirst('toast://', '');
-
       // Decode URL encoding if present
       message = Uri.decodeComponent(message);
 

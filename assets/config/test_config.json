@@ -1,0 +1,94 @@
+
+{
+    "lang": "en",
+    "theme": {
+      "primaryColor": "0xFFFAB510",
+      "lightBackground": "#F5F5F5",
+      "darkBackground": "#121212",
+      "darkSurface": "#1E1E1E",
+      "defaultMode": "system",
+      "direction": "LTR"
+    },
+    "main_icons": [
+      {
+        "title": "Home",
+        "icon-line": "https://cdn-icons-png.flaticon.com/128/1946/1946488.png",
+        "icon-solid": "https://cdn-icons-png.flaticon.com/128/1946/1946436.png",
+        "link": "https://mobile.erpforever.com/?mojeer=check&heeloo=true&user-role=",
+        "link_type": "regular_webview",
+        "header_icons": [
+          {
+            "title": "First",
+            "icon": "https://cdn-icons-png.flaticon.com/128/1946/1946488.png",
+            "link": "https://mobile.erpforever.com/",
+            "link_type": "sheet_webview"
+          },
+          {
+            "title": "First",
+            "icon": "https://cdn-icons-png.flaticon.com/128/1946/1946488.png",
+            "link": "https://mobile.erpforever.com/",
+            "link_type": "regular_webview"
+          }
+        ]
+      },
+      {
+        "title": "Customers",
+        "icon-line": "https://cdn-icons-png.flaticon.com/128/3126/3126649.png",
+        "icon-solid": "https://cdn-icons-png.flaticon.com/128/3126/3126649.png",
+        "link": "https://mujeer.com/admin",
+        "link_type": "regular_webview"
+      },
+      {
+        "title": "Invoices",
+        "icon-line": "https://cdn-icons-png.flaticon.com/128/1159/1159679.png",
+        "icon-solid": "https://cdn-icons-png.flaticon.com/128/1159/1159679.png",
+        "link": "https://mobile.erpforever.com/",
+        "link_type": "regular_webview"
+      },
+      {
+        "title": "AI Assistant",
+        "icon-line": "https://cdn-icons-png.flaticon.com/128/10446/10446187.png",
+        "icon-solid": "https://cdn-icons-png.flaticon.com/128/10446/10446187.png",
+        "link": "https://mobile.erpforever.com/chatbot",
+        "link_type": "regular_webview"
+      }
+    ],
+    "sheet_icons": [
+      {
+        "title": "Sheet First",
+        "icon-line": "https://cdn-icons-png.flaticon.com/128/1946/1946488.png",
+        "icon-solid": "https://cdn-icons-png.flaticon.com/128/1946/1946436.png",
+        "link": "https://mobile.erpforever.com/",
+        "link_type": "regular_webview",
+        "header_icons": [
+          {
+            "title": "Sheet First Sub",
+            "icon": "https://cdn-icons-png.flaticon.com/128/1946/1946488.png",
+            "link": "https://mobile.erpforever.com/",
+            "link_type": "sheet_webview"
+          }
+        ]
+      },
+      {
+        "title": "Sheet Second",
+        "icon-line": "https://cdn-icons-png.flaticon.com/128/1946/1946488.png",
+        "icon-solid": "https://cdn-icons-png.flaticon.com/128/1946/1946436.png",
+        "link": "https://mujeer.com/admin",
+        "link_type": "regular_webview"
+      },
+      {
+        "title": "Sheet Third",
+        "icon-line": "https://cdn-icons-png.flaticon.com/128/1946/1946488.png",
+        "icon-solid": "https://cdn-icons-png.flaticon.com/128/1946/1946436.png",
+        "link": "https://mujeer.com/admin",
+        "link_type": "sheet_webview"
+      },
+      {
+        "title": "Sheet Fourth",
+        "icon-line": "https://cdn-icons-png.flaticon.com/128/1946/1946488.png",
+        "icon-solid": "https://cdn-icons-png.flaticon.com/128/1946/1946436.png",
+        "link": "https://mujeer.com/admin",
+        "link_type": "regular_webview"
+      }
+    ]
+  }

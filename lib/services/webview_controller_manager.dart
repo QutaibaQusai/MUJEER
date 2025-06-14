@@ -11,18 +11,30 @@ class WebViewControllerManager {
   final Map<int, WebViewController> _controllers = {};
   final Map<int, bool> _loadingStates = {};
 
-  WebViewController getController(int index, String url, [BuildContext? context]) {
-    if (!_controllers.containsKey(index)) {
-      // Pass context to the WebViewService for theme handling
-      _controllers[index] = WebViewService().createController(url, context);
-      _loadingStates[index] = true;
-    } else if (context != null) {
+WebViewController getController(int index, String url, [BuildContext? context]) {
+  debugPrint('🔍 WebViewControllerManager: Getting controller for index $index, URL: $url');
+  
+  if (!_controllers.containsKey(index)) {
+    debugPrint('🆕 Creating new controller for index $index');
+    
+    // Pass context to the WebViewService for theme handling
+    _controllers[index] = WebViewService().createController(url, context);
+    _loadingStates[index] = true;
+    
+    debugPrint('✅ Controller created and stored for index $index');
+  } else {
+    debugPrint('♻️ Reusing existing controller for index $index');
+    
+    if (context != null) {
       // Update context if controller already exists
       WebViewService().updateContext(context);
     }
-    return _controllers[index]!;
   }
-
+  
+  final controller = _controllers[index]!;
+  debugPrint('📤 Returning controller for index $index');
+  return controller;
+}
   void setLoadingState(int index, bool isLoading) {
     _loadingStates[index] = isLoading;
   }

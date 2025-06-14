@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:MUJEER/main.dart';
 import 'package:MUJEER/pages/no_internet_page.dart';
 import 'package:MUJEER/services/internet_connection_service.dart';
@@ -202,30 +201,6 @@ class _MainScreenState extends State<MainScreen>
     }
   }
 
-  Future<void> _checkAndRestoreIfNeeded() async {
-    try {
-      // Small delay to ensure app is fully resumed
-      await Future.delayed(Duration(milliseconds: 500));
-
-      if (!mounted) return;
-
-      // Check if current WebView has content
-      final hasContent = await _checkWebViewHasContent(_selectedIndex);
-
-      if (!hasContent) {
-        debugPrint('🔄 WebView is empty - refreshing current tab');
-        await _refreshCurrentTab();
-      } else {
-        debugPrint('✅ WebView has content - no refresh needed');
-        // Just restore scroll position if content is there
-        _restoreScrollPosition(_selectedIndex);
-      }
-    } catch (e) {
-      debugPrint('❌ Error checking restoration need: $e');
-      // If check fails, refresh to be safe
-      await _refreshCurrentTab();
-    }
-  }
 
   Future<bool> _checkWebViewHasContent(int tabIndex) async {
     try {
@@ -279,164 +254,21 @@ class _MainScreenState extends State<MainScreen>
     }
   }
 
-  Future<void> _refreshCurrentTab() async {
-    try {
-      debugPrint('🔄 Refreshing current tab $_selectedIndex');
 
-      setState(() {
-        _loadingStates[_selectedIndex] = true;
-      });
-
-      final controller = _controllerManager.getController(
-        _selectedIndex,
-        '',
-        context,
-      );
-      await controller.reload();
-
-      // Loading state will be updated by the navigation delegate
-      debugPrint('✅ Tab refresh initiated');
-    } catch (e) {
-      debugPrint('❌ Error refreshing tab: $e');
-      if (mounted) {
-        setState(() {
-          _loadingStates[_selectedIndex] = false;
-        });
-      }
-    }
-  }
-
-  void _restoreScrollPosition(int tabIndex) {
-    try {
-      final controller = _controllerManager.getController(
-        tabIndex,
-        '',
-        context,
-      );
-
-      controller.runJavaScript('''
-      try {
-        if (window.savedAppState && window.savedAppState.scrollX !== undefined) {
-          // Small delay to ensure page is ready
-          setTimeout(() => {
-            window.scrollTo(window.savedAppState.scrollX, window.savedAppState.scrollY);
-            console.log('📍 Scroll position restored:', window.savedAppState.scrollX, window.savedAppState.scrollY);
-          }, 300);
-        }
-      } catch (error) {
-        console.error('❌ Error restoring scroll:', error);
-      }
-    ''');
-    } catch (e) {
-      debugPrint('❌ Error restoring scroll position: $e');
-    }
-  }
-
-  Future<void> _checkBackgroundTabs() async {
-    final config = _configService.config;
-    if (config == null) return;
-
-    for (int i = 0; i < config.mainIcons.length; i++) {
-      if (i != _selectedIndex &&
-          config.mainIcons[i].linkType != 'sheet_webview') {
-        // Check with delay to avoid overwhelming the system
-        Future.delayed(Duration(seconds: i * 2), () async {
-          if (mounted) {
-            final hasContent = await _checkWebViewHasContent(i);
-            if (!hasContent) {
-              debugPrint(
-                '🔄 Background tab $i needs refresh - will refresh when accessed',
-              );
-              // Mark for refresh when user switches to this tab
-              _loadingStates[i] = true;
-            }
-          }
-        });
-      }
-    }
-  }
-
-  void _restoreWebViewState() async {
-    try {
-      // Small delay to ensure app is fully resumed
-      await Future.delayed(Duration(milliseconds: 300));
-
-      if (!mounted) return;
-
-      final config = _configService.config;
-      if (config == null || _selectedIndex >= config.mainIcons.length) return;
-
-      final controller = _controllerManager.getController(
-        _selectedIndex,
-        '',
-        context,
-      );
-
-      // Restore scroll position and check if content is still there
-      controller.runJavaScript('''
-      try {
-        // Check if page content is still available
-        const hasContent = document.body && document.body.children.length > 0;
-        
-        if (!hasContent) {
-          console.log('⚠️ Page content missing - may need reload');
-          // Don't auto-reload - let user decide
-          return;
-        }
-        
-        // Restore scroll position if saved
-        if (window.savedScrollPosition) {
-          const saved = window.savedScrollPosition;
-          const timeDiff = Date.now() - saved.timestamp;
-          
-          // Only restore if not too old (within 5 minutes)
-          if (timeDiff < 300000) {
-            window.scrollTo(saved.x, saved.y);
-            console.log('✅ Scroll position restored:', saved);
-          } else {
-            console.log('⏰ Saved position too old, ignoring');
-          }
-        }
-        
-        // Re-initialize any JavaScript that might have been lost
-        if (typeof window.ERPForever !== 'undefined') {
-          console.log('✅ ERPForever JavaScript still available');
-        } else {
-          console.log('⚠️ ERPForever JavaScript missing - may need page interaction');
-        }
-        
-      } catch (e) {
-        console.error('❌ Error restoring state:', e);
-      }
-    ''');
-
-      // Update UI state without forcing refresh
-      setState(() {
-        // Keep current loading state - don't force loading
-        // _loadingStates[_selectedIndex] = _loadingStates[_selectedIndex] ?? false;
-      });
-
-      debugPrint(
-        '✅ WebView state restoration attempted for tab $_selectedIndex',
-      );
-    } catch (e) {
-      debugPrint('❌ Error restoring WebView state: $e');
-    }
-  }
-
-  void _initializeLoadingStates() {
+    void _initializeLoadingStates() {
     final config = _configService.config;
     if (config != null && config.mainIcons.isNotEmpty) {
-      // ✅ KEEP: Only initialize index 0 for lazy loading during splash
-      _loadingStates[0] = true;
-      _isAtTopStates[0] = true;
-      _isRefreshingStates[0] = false;
-      _channelAdded[0] = false;
-      _refreshChannelAdded[0] = false;
-      _refreshChannelNames[0] =
-          'MainScreenRefresh_0_${DateTime.now().millisecondsSinceEpoch}';
+      for (int i = 0; i < config.mainIcons.length; i++) {
+        _loadingStates[i] = i == 0 ? true : false; 
+        _isAtTopStates[i] = true;
+        _isRefreshingStates[i] = false;
+        _channelAdded[i] = false;
+        _refreshChannelAdded[i] = false;
+        _refreshChannelNames[i] = 'MainScreenRefresh_${i}_${DateTime.now().millisecondsSinceEpoch}';
+      }
 
-      debugPrint('✅ Initialized only index 0 for lazy loading during splash');
+      debugPrint('✅ Initialized all ${config.mainIcons.length} tabs for lazy loading');
+      debugPrint('🏠 Tab 0 (Home) will start loading immediately');
     }
   }
 
@@ -535,57 +367,6 @@ class _MainScreenState extends State<MainScreen>
     );
   }
 
-  // 🆕 NEW: Setup controller for preloaded tabs
-  void _setupTabController(WebViewController controller, int index, mainIcon) {
-    controller.setNavigationDelegate(
-      NavigationDelegate(
-        onPageStarted: (String url) {
-          debugPrint('🔄 Preloaded tab $index started loading: $url');
-          if (mounted) {
-            setState(() {
-              _loadingStates[index] = true;
-              _isAtTopStates[index] = true;
-            });
-          }
-        },
-        onPageFinished: (String url) {
-          debugPrint('✅ Preloaded tab $index finished loading: $url');
-
-          if (mounted) {
-            setState(() {
-              _loadingStates[index] = false;
-            });
-          }
-
-          // Setup JavaScript for preloaded tabs
-          _injectScrollMonitoring(controller, index);
-
-          // Add native pull-to-refresh after page loads
-          Future.delayed(const Duration(milliseconds: 800), () {
-            _injectNativePullToRefresh(controller, index);
-          });
-
-          debugPrint(
-            '🎯 Tab $index (${mainIcon.title}) is now ready for instant switching!',
-          );
-        },
-        onWebResourceError: (WebResourceError error) {
-          debugPrint(
-            '❌ WebResource error for preloaded tab $index: ${error.description}',
-          );
-          if (mounted) {
-            setState(() {
-              _loadingStates[index] = false;
-            });
-          }
-        },
-        onNavigationRequest: (NavigationRequest request) {
-          WebViewService().updateController(controller, context);
-          return _handleNavigationRequest(request);
-        },
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -653,18 +434,50 @@ class _MainScreenState extends State<MainScreen>
     );
   }
 
-  Widget _buildBody(config) {
-    if (config.mainIcons.isEmpty) {
-      return const Center(child: Text('No navigation items configured'));
-    }
-
-    // ✅ KEEP: Only build the currently selected tab content
-    return _buildTabContent(_selectedIndex, config.mainIcons[_selectedIndex]);
+Widget _buildBody(config) {
+  debugPrint('🏗️ Building body for main screen');
+  debugPrint('📊 Config main icons length: ${config.mainIcons.length}');
+  debugPrint('🎯 Selected index: $_selectedIndex');
+  
+  if (config.mainIcons.isEmpty) {
+    debugPrint('❌ No navigation items configured');
+    return const Center(child: Text('No navigation items configured'));
   }
 
+  if (_selectedIndex >= config.mainIcons.length) {
+    debugPrint('❌ Selected index $_selectedIndex is out of range (max: ${config.mainIcons.length - 1})');
+    return const Center(child: Text('Invalid tab selection'));
+  }
+
+  final selectedIcon = config.mainIcons[_selectedIndex];
+  debugPrint('📱 Selected tab: ${selectedIcon.title} (${selectedIcon.linkType})');
+  debugPrint('🔗 Tab URL: ${selectedIcon.link}');
+
+  // ✅ Build the currently selected tab content
+  final tabContent = _buildTabContent(_selectedIndex, selectedIcon);
+  debugPrint('✅ Tab content built for index $_selectedIndex');
+  
+  return tabContent;
+}
+
   Widget _buildTabContent(int index, mainIcon) {
+    debugPrint('🏗️ Building tab content for index $index: ${mainIcon.title}');
+    
     if (mainIcon.linkType == 'sheet_webview') {
-      return const Center(child: Text('This tab opens as a sheet'));
+      debugPrint('📋 Tab $index is sheet type - showing placeholder');
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.touch_app, size: 64, color: Colors.grey),
+            SizedBox(height: 16),
+            Text(
+              'Tap to open in sheet',
+              style: TextStyle(color: Colors.grey, fontSize: 16),
+            ),
+          ],
+        ),
+      );
     }
 
     return Consumer<RefreshStateManager>(
@@ -700,7 +513,6 @@ class _MainScreenState extends State<MainScreen>
       },
     );
   }
-
   Future<void> _refreshWebView(int index) async {
     final refreshManager = Provider.of<RefreshStateManager>(
       context,
@@ -739,22 +551,26 @@ class _MainScreenState extends State<MainScreen>
     }
   }
 
-  Widget _buildWebView(int index, String url) {
+Widget _buildWebView(int index, String url) {
+    debugPrint('🌐 Building WebView for tab $index with URL: $url');
+    
     final controller = _controllerManager.getController(index, url, context);
 
-    // ✅ FIXED: Always ensure tab is initialized for pull-to-refresh
+    // ✅ CRITICAL: Always ensure tab is initialized for pull-to-refresh
     _ensureTabInitialized(index);
 
-    // ✅ FIXED: Always set up the controller properly, regardless of tab index
+    // ✅ CRITICAL: Always set up the controller properly, regardless of tab index
     _setupTabControllerForPullRefresh(controller, index);
 
-    // ✅ FIXED: Always add refresh channel - with better error handling
+    // ✅ CRITICAL: Always add refresh channel - with better error handling
     if (_refreshChannelAdded[index] != true) {
       _addRefreshChannelSafely(controller, index);
     }
 
+    debugPrint('✅ WebView widget created for tab $index');
     return WebViewWidget(controller: controller);
   }
+
 
   void _ensureTabInitialized(int index) {
     if (!_loadingStates.containsKey(index)) {
@@ -774,7 +590,7 @@ class _MainScreenState extends State<MainScreen>
     }
   }
 
-  void _setupTabControllerForPullRefresh(
+ void _setupTabControllerForPullRefresh(
     WebViewController controller,
     int index,
   ) {
@@ -806,8 +622,8 @@ class _MainScreenState extends State<MainScreen>
             });
           }
 
-          // ✅ CRITICAL: Always notify splash for any tab that finishes loading
-          if (index == _selectedIndex) {
+          // ✅ CRITICAL: Always notify splash for tab 0 that finishes loading
+          if (index == 0) {
             _notifyWebViewReady();
           }
 
@@ -847,7 +663,6 @@ class _MainScreenState extends State<MainScreen>
     _channelAdded[index] = true;
     debugPrint('✅ Tab $index controller setup completed');
   }
-
   void _addRefreshChannelSafely(WebViewController controller, int index) {
     final refreshChannelName = _refreshChannelNames[index]!;
 

@@ -695,7 +695,6 @@ class _WebViewPageState extends State<WebViewPage> {
   }
 
   NavigationDecision _handleNavigationRequest(NavigationRequest request) {
-    debugPrint('🔍 Handling navigation in WebViewPage: ${request.url}');
 
     // PRIORITY: Handle toast requests FIRST
     if (request.url.startsWith('toast://')) {
