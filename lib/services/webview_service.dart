@@ -9,9 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:MUJEER/models/link_types.dart';
 import 'package:MUJEER/pages/webview_page.dart';
 import 'package:MUJEER/pages/barcode_scanner_page.dart';
-import 'package:MUJEER/pages/login_page.dart';
 import 'package:MUJEER/widgets/webview_sheet.dart';
-import 'package:MUJEER/services/auth_service.dart';
 import 'package:MUJEER/services/location_service.dart';
 import 'package:MUJEER/services/contacts_service.dart';
 import 'package:MUJEER/services/screenshot_service.dart';
@@ -95,13 +93,7 @@ class WebViewService {
           _handleBarcodeRequest(message.message);
         },
       )
-      ..addJavaScriptChannel(
-        'AuthManager',
-        onMessageReceived: (JavaScriptMessage message) {
-          debugPrint('🚪 Auth message: ${message.message}');
-          _handleAuthRequest(message.message);
-        },
-      )
+   
       ..addJavaScriptChannel(
         'LocationManager',
         onMessageReceived: (JavaScriptMessage message) {
@@ -520,20 +512,12 @@ class WebViewService {
 
   NavigationDecision _handleNavigationRequest(NavigationRequest request) {
     debugPrint('🔍 Handling navigation request: ${request.url}');
-    // NEW: Handle loggedin:// protocol for config updates
-    if (request.url.startsWith('loggedin://')) {
-      _handleLoginConfigRequest(request.url);
-      return NavigationDecision.prevent;
-    }
+ 
     if (request.url.startsWith('toast://')) {
       _handleToastRequest(request.url);
       return NavigationDecision.prevent;
     }
-    // Handle auth requests
-    else if (request.url.startsWith('logout://')) {
-      _handleAuthRequest('logout');
-      return NavigationDecision.prevent;
-    }
+  
     // Handle location requests
     else if (request.url.startsWith('get-location://')) {
       _handleLocationRequest('getCurrentLocation');
@@ -1292,76 +1276,7 @@ class WebViewService {
     // REMOVED: All native SnackBar code
   }
 
-  void _handleAuthRequest(String message) {
-    debugPrint('🚪 Auth request received: $message');
 
-    if (_currentContext == null) {
-      debugPrint('❌ No context available for auth request');
-      return;
-    }
-
-    if (message == 'logout') {
-      debugPrint('🔄 Processing logout request...');
-      _performLogout();
-    } else {
-      debugPrint('⚠️ Unknown auth request: $message');
-    }
-  }
-
-  void _performLogout() async {
-    debugPrint('🚪 Starting logout process...');
-
-    if (_currentContext == null) {
-      debugPrint('❌ No context available for logout');
-      return;
-    }
-
-    try {
-      final authService = Provider.of<AuthService>(
-        _currentContext!,
-        listen: false,
-      );
-
-      debugPrint('🔄 Calling authService.logout()...');
-      await authService.logout();
-
-      debugPrint('✅ Logout successful, using web scripts for feedback...');
-
-      // Use web scripts instead of native SnackBar
-      if (_currentController != null) {
-        _currentController!.runJavaScript('''
-        if (window.ToastManager) {
-          window.ToastManager.postMessage('toast://' + encodeURIComponent('Logged out successfully'));
-        } else {
-          window.location.href = 'toast://' + encodeURIComponent('Logged out successfully');
-        }
-      ''');
-      }
-
-      debugPrint('🔄 Navigating to login page...');
-
-      Navigator.of(_currentContext!).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => const LoginPage()),
-        (route) => false,
-      );
-
-      debugPrint('✅ Navigation to login page completed');
-    } catch (e) {
-      debugPrint('❌ Error during logout: $e');
-
-      // Use web scripts instead of native SnackBar
-      if (_currentController != null) {
-        _currentController!.runJavaScript('''
-        const errorMessage = 'Error during logout';
-        if (window.AlertManager) {
-          window.AlertManager.postMessage('alert://' + encodeURIComponent(errorMessage));
-        } else {
-          window.location.href = 'alert://' + encodeURIComponent(errorMessage);
-        }
-      ''');
-      }
-    }
-  }
 
   void _handleBarcodeRequest(String message) {
     if (_currentContext == null) return;
@@ -2535,74 +2450,6 @@ createBlackToast: function(message) {
 
   // lib/services/webview_service.dart - REPLACE the _handleLoginConfigRequest method with this:
 
-  void _handleLoginConfigRequest(String loginUrl) async {
-    if (_currentContext == null) {
-      debugPrint('❌ No context available for login config request');
-      return;
-    }
-
-    debugPrint('🔗 WebView login config request: $loginUrl');
-
-    try {
-      final parsedData = ConfigService.parseLoginConfigUrl(loginUrl);
-
-      if (parsedData.isNotEmpty && parsedData.containsKey('configUrl')) {
-        final configUrl = parsedData['configUrl']!;
-        final userRole = parsedData['role'];
-
-        debugPrint('🔄 Processing config URL: $configUrl');
-        debugPrint('👤 User role: ${userRole ?? 'not specified'}');
-
-        // 🆕 ENHANCED: Set dynamic config URL with context
-        await ConfigService().setDynamicConfigUrl(configUrl, role: userRole);
-
-        // 🆕 NEW: Reload config immediately with current context
-        if (_currentContext != null && _currentContext!.mounted) {
-          debugPrint('🔄 Reloading configuration with WebView context...');
-          await ConfigService().loadConfig(_currentContext!);
-          debugPrint('✅ Configuration reloaded with enhanced app data');
-        }
-
-        // Use web scripts for success feedback
-        if (_currentController != null) {
-          _currentController!.runJavaScript('''
-          const message = 'Configuration updated successfully with enhanced app data!';
-          if (window.ToastManager) {
-            window.ToastManager.postMessage('toast://' + encodeURIComponent(message));
-          } else {
-            window.location.href = 'toast://' + encodeURIComponent(message);
-          }
-        ''');
-        }
-      } else {
-        // Use web scripts for error feedback
-        if (_currentController != null) {
-          _currentController!.runJavaScript('''
-          const errorMessage = 'Invalid configuration URL';
-          if (window.AlertManager) {
-            window.AlertManager.postMessage('alert://' + encodeURIComponent(errorMessage));
-          } else {
-            window.location.href = 'alert://' + encodeURIComponent(errorMessage);
-          }
-        ''');
-        }
-      }
-    } catch (e) {
-      debugPrint('❌ Error in WebView config request: $e');
-
-      // Use web scripts for error feedback
-      if (_currentController != null) {
-        _currentController!.runJavaScript('''
-        const errorMessage = 'Error updating configuration: ${e.toString()}';
-        if (window.AlertManager) {
-          window.AlertManager.postMessage('alert://' + encodeURIComponent(errorMessage));
-        } else {
-          window.location.href = 'alert://' + encodeURIComponent(errorMessage);
-        }
-      ''');
-      }
-    }
-  }
 
   void clearCurrentController() {
     debugPrint('🧹 Clearing all controller references');

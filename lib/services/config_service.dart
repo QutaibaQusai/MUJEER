@@ -1,4 +1,3 @@
-// lib/services/config_service.dart - UPDATED: Always use remote URL, no local fallback
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -169,86 +168,6 @@ class ConfigService extends ChangeNotifier with WidgetsBindingObserver {
     }
   }
 
-  static Map<String, String> parseLoginConfigUrl(String loginUrl) {
-    try {
-      debugPrint('🔍 Parsing login config URL: $loginUrl');
-
-      if (!loginUrl.startsWith('loggedin://')) {
-        debugPrint('❌ Invalid login URL format - must start with loggedin://');
-        return {};
-      }
-
-      String cleanUrl = loginUrl.replaceFirst('loggedin://', '');
-      
-      Uri uri;
-      try {
-        uri = Uri.parse('https://$cleanUrl');
-      } catch (e) {
-        debugPrint('❌ Error parsing URI: $e');
-        return {};
-      }
-
-      String configPath = uri.path;
-      if (configPath.isEmpty || configPath == '/') {
-        configPath = '/config';
-      }
-
-      String baseUrl = 'https://mobile.erpforever.com';
-      String fullConfigUrl = '$baseUrl$configPath';
-
-      if (uri.queryParameters.isNotEmpty) {
-        final queryString = uri.query;
-        fullConfigUrl += '?$queryString';
-      }
-
-      String? role = uri.queryParameters['role'] ?? 
-                    uri.queryParameters['user-role'] ?? 
-                    uri.queryParameters['userRole'] ??
-                    uri.queryParameters['user_role'];
-
-      debugPrint('✅ Parsed results:');
-      debugPrint('   Config URL: $fullConfigUrl');
-      debugPrint('   Extracted role: ${role ?? 'not specified'}');
-      debugPrint('   All query params: ${uri.queryParameters}');
-
-      final result = {'configUrl': fullConfigUrl};
-      if (role != null && role.trim().isNotEmpty) {
-        result['role'] = role.trim();
-      }
-
-      return result;
-    } catch (e) {
-      debugPrint('❌ Error parsing login config URL: $e');
-      return {};
-    }
-  }
-
-  Future<void> setDynamicConfigUrl(String configUrl, {String? role}) async {
-    try {
-      debugPrint('🔄 Setting dynamic config URL: $configUrl');
-      debugPrint('👤 User role: ${role ?? 'not specified'}');
-
-      _dynamicConfigUrl = configUrl;
-      _userRole = role?.trim();
-
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_dynamicConfigUrlKey, configUrl);
-      
-      if (_userRole != null && _userRole!.isNotEmpty) {
-        await prefs.setString(_userRoleKey, _userRole!);
-        debugPrint('✅ User role saved: $_userRole');
-      } else {
-        await prefs.remove(_userRoleKey);
-        debugPrint('⚠️ No valid role provided, removing stored role');
-      }
-
-      debugPrint('✅ Dynamic config URL and role saved successfully');
-
-      await loadConfig();
-    } catch (e) {
-      debugPrint('❌ Error setting dynamic config URL: $e');
-    }
-  }
 
   Future<void> _loadSavedDynamicConfigUrl() async {
     try {

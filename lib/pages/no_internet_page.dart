@@ -26,27 +26,20 @@ class _NoInternetPageState extends State<NoInternetPage>
       duration: const Duration(seconds: 2),
       vsync: this,
     )..repeat(reverse: true);
-    
+
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
 
-    _pulseAnimation = Tween<double>(
-      begin: 0.8,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _pulseController,
-      curve: Curves.easeInOut,
-    ));
+    _pulseAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
 
     _fadeAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeOut,
-    ));
+    ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeOut));
 
     _fadeController.forward();
   }
@@ -60,26 +53,21 @@ class _NoInternetPageState extends State<NoInternetPage>
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final size = MediaQuery.of(context).size;
-    
+
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: isDarkMode
-                ? [
-                    const Color(0xFF0F0F23),
-                    const Color(0xFF1A1A2E),
-                    const Color(0xFF16213E),
-                  ]
-                : [
-                    const Color(0xFFF8FBFF),
-                    const Color(0xFFEEF7FF),
-                    const Color(0xFFE3F2FD),
-                  ],
+            colors:
+                [
+                      const Color(0xFF0F0F23),
+                      const Color(0xFF1A1A2E),
+                      const Color(0xFF16213E),
+                    ]
+                  
           ),
         ),
         child: Consumer<InternetConnectionService>(
@@ -92,7 +80,7 @@ class _NoInternetPageState extends State<NoInternetPage>
                 );
               });
             }
-            
+
             return SafeArea(
               child: FadeTransition(
                 opacity: _fadeAnimation,
@@ -117,7 +105,9 @@ class _NoInternetPageState extends State<NoInternetPage>
                                     shape: BoxShape.circle,
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.red.withOpacity(0.3 * _pulseAnimation.value),
+                                        color: Colors.red.withOpacity(
+                                          0.3 * _pulseAnimation.value,
+                                        ),
                                         blurRadius: 40,
                                         spreadRadius: 10,
                                       ),
@@ -132,16 +122,20 @@ class _NoInternetPageState extends State<NoInternetPage>
                               height: 120,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: isDarkMode 
-                                    ? const Color(0xFF2A2A3E).withOpacity(0.8)
-                                    : Colors.white.withOpacity(0.9),
+                                color:
+                                  const Color(
+                                          0xFF2A2A3E,
+                                        ).withOpacity(0.8)
+                                       ,
                                 border: Border.all(
                                   color: Colors.red.withOpacity(0.3),
                                   width: 2,
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(isDarkMode ? 0.4 : 0.1),
+                                    color: Colors.black.withOpacity(
+                                      0.4 ,
+                                    ),
                                     blurRadius: 20,
                                     offset: const Offset(0, 8),
                                   ),
@@ -155,51 +149,59 @@ class _NoInternetPageState extends State<NoInternetPage>
                             ),
                           ],
                         ),
-                        
+
                         const SizedBox(height: 48),
-                        
+
                         // Title with better typography
                         Text(
                           'Oops!',
                           style: GoogleFonts.rubik(
                             fontSize: 32,
                             fontWeight: FontWeight.w700,
-                            color: isDarkMode ? Colors.white : const Color(0xFF1A1A2E),
+                            color:
+                                Colors.white
+                                    ,
                             letterSpacing: -0.5,
                           ),
                           textAlign: TextAlign.center,
                         ),
-                        
+
                         const SizedBox(height: 8),
-                        
+
                         Text(
                           'No Internet Connection',
                           style: GoogleFonts.rubik(
                             fontSize: 18,
                             fontWeight: FontWeight.w500,
-                            color: isDarkMode ? Colors.grey[300] : const Color(0xFF64748B),
+                            color:
+                                 Colors.grey[300]
+                                    ,
                           ),
                           textAlign: TextAlign.center,
                         ),
-                        
+
                         const SizedBox(height: 16),
-                        
+
                         // Subtitle with better spacing
                         Container(
-                          constraints: BoxConstraints(maxWidth: size.width * 0.8),
+                          constraints: BoxConstraints(
+                            maxWidth: size.width * 0.8,
+                          ),
                           child: Text(
                             'Check your connection and try again.\nWe\'ll get you back online in no time!',
                             style: GoogleFonts.rubik(
                               fontSize: 15,
                               height: 1.5,
-                              color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                              color:
+                                   Colors.grey[400]
+                                      ,
                             ),
                             textAlign: TextAlign.center,
                           ),
                         ),
-                        
+
                         const SizedBox(height: 64),
-                        
+
                         // Enhanced retry button
                         Container(
                           width: 220,
@@ -207,25 +209,32 @@ class _NoInternetPageState extends State<NoInternetPage>
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(28),
                             gradient: LinearGradient(
-                              colors: _isRetrying
-                                  ? [Colors.grey[400]!, Colors.grey[500]!]
-                                  : [
-                                      const Color(0xFF3B82F6),
-                                      const Color(0xFF1D4ED8),
-                                    ],
+                              colors:
+                                  _isRetrying
+                                      ? [Colors.grey[400]!, Colors.grey[500]!]
+                                      : [
+                                        const Color(0xFF3B82F6),
+                                        const Color(0xFF1D4ED8),
+                                      ],
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: _isRetrying 
-                                    ? Colors.transparent
-                                    : const Color(0xFF3B82F6).withOpacity(0.4),
+                                color:
+                                    _isRetrying
+                                        ? Colors.transparent
+                                        : const Color(
+                                          0xFF3B82F6,
+                                        ).withOpacity(0.4),
                                 blurRadius: 20,
                                 offset: const Offset(0, 8),
                               ),
                             ],
                           ),
                           child: ElevatedButton(
-                            onPressed: _isRetrying ? null : () => _handleRetry(connectionService),
+                            onPressed:
+                                _isRetrying
+                                    ? null
+                                    : () => _handleRetry(connectionService),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.transparent,
                               shadowColor: Colors.transparent,
@@ -233,54 +242,58 @@ class _NoInternetPageState extends State<NoInternetPage>
                                 borderRadius: BorderRadius.circular(28),
                               ),
                             ),
-                            child: _isRetrying
-                                ? Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2.5,
-                                          valueColor: AlwaysStoppedAnimation<Color>(
-                                            Colors.white.withOpacity(0.8),
+                            child:
+                                _isRetrying
+                                    ? Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        SizedBox(
+                                          width: 20,
+                                          height: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2.5,
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                  Colors.white.withOpacity(0.8),
+                                                ),
                                           ),
                                         ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Text(
-                                        'Connecting...',
-                                        style: GoogleFonts.rubik(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.white.withOpacity(0.8),
+                                        const SizedBox(width: 12),
+                                        Text(
+                                          'Connecting...',
+                                          style: GoogleFonts.rubik(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.white.withOpacity(
+                                              0.8,
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                    ],
-                                  )
-                                : Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        Icons.refresh_rounded,
-                                        size: 20,
-                                        color: Colors.white,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        'Try Again',
-                                        style: GoogleFonts.rubik(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
+                                      ],
+                                    )
+                                    : Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.refresh_rounded,
+                                          size: 20,
                                           color: Colors.white,
                                         ),
-                                      ),
-                                    ],
-                                  ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          'Try Again',
+                                          style: GoogleFonts.rubik(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                           ),
                         ),
-                        
-                     
                       ],
                     ),
                   ),
@@ -293,18 +306,16 @@ class _NoInternetPageState extends State<NoInternetPage>
     );
   }
 
-
-
   Future<void> _handleRetry(InternetConnectionService connectionService) async {
     if (_isRetrying) return;
-    
+
     setState(() {
       _isRetrying = true;
     });
 
     await Future.delayed(const Duration(milliseconds: 1200));
     final success = await connectionService.retryConnection();
-    
+
     if (mounted) {
       setState(() {
         _isRetrying = false;
