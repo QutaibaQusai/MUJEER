@@ -21,14 +21,9 @@ class DynamicBottomNavigation extends StatelessWidget {
     final config = ConfigService().config;
     if (config == null) return const SizedBox.shrink();
 
-
-    final primaryColor = getColorFromHex(config.theme.primaryColor);
-    debugPrint('$primaryColor ');
-
-
     return Container(
       decoration: BoxDecoration(
-        color:  const Color(0xFF1E1E1E) ,
+        color: const Color(0xFF1E1E1E),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
@@ -41,19 +36,24 @@ class DynamicBottomNavigation extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8),
           child: GNav(
-            rippleColor:  Colors.grey[800]! ,
-            hoverColor:  Colors.grey[700]! ,
+            rippleColor: Colors.grey[800]!,
+            hoverColor: Colors.grey[700]!,
             haptic: true,
             tabBorderRadius: 25,
-            tabActiveBorder: Border.all(color: primaryColor, width: 1),
+            tabActiveBorder: Border.all(
+              color: Color(0xFFFAB510),
+              width: 1,
+            ), 
             tabBorder: Border.all(color: Colors.transparent, width: 1),
             curve: Curves.easeIn,
             duration: const Duration(milliseconds: 200),
             gap: 8,
             color: Colors.white,
-            activeColor: primaryColor,
+            activeColor: Color(0xFFFAB510), 
             iconSize: 24,
-            tabBackgroundColor: primaryColor.withOpacity(0.2),
+            tabBackgroundColor: Color(
+              0xFFFAB510,
+            ).withOpacity(0.2),
             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
             selectedIndex: selectedIndex,
             onTabChange: (index) {
@@ -64,7 +64,7 @@ class DynamicBottomNavigation extends StatelessWidget {
             tabs: _buildNavigationTabs(
               context,
               config,
-              primaryColor,
+              Color(0xFFFAB510),
               Colors.white,
             ),
           ),
@@ -73,16 +73,43 @@ class DynamicBottomNavigation extends StatelessWidget {
     );
   }
 
-  Color getColorFromHex(String hexColor) {
+  Color _parseColorFromConfig(String colorValue) {
     try {
-      String cleaned = hexColor.trim().toUpperCase().replaceAll('#', '');
-      if (cleaned.length == 6) {
-        cleaned = 'FF$cleaned'; 
+
+      String cleanColor = colorValue.trim();
+
+      if (cleanColor.startsWith('0x')) {
+        cleanColor = cleanColor.substring(2);
+
+        if (cleanColor.length == 6) {
+          cleanColor = 'FF$cleanColor'; 
+        }
+
+        final colorInt = int.parse(cleanColor, radix: 16);
+        final color = Color(colorInt);
+        return color;
+      } else if (cleanColor.startsWith('#')) {
+        cleanColor = cleanColor.substring(1); 
+
+        if (cleanColor.length == 6) {
+          cleanColor = 'FF$cleanColor'; 
+        }
+
+        final colorInt = int.parse(cleanColor, radix: 16);
+        final color = Color(colorInt);
+        return color;
+      } else {
+        if (cleanColor.length == 6) {
+          cleanColor = 'FF$cleanColor'; 
+        }
+
+        final colorInt = int.parse(cleanColor, radix: 16);
+        final color = Color(colorInt);
+        return color;
       }
-      return Color(int.parse('0x$cleaned'));
     } catch (e) {
-      debugPrint('❌ Invalid hex color: $hexColor. Error: $e');
-      return const Color(0xFFFF0000); 
+    
+      return const Color.fromARGB(255, 255, 255, 255); 
     }
   }
 
@@ -105,14 +132,14 @@ class DynamicBottomNavigation extends StatelessWidget {
             iconSolidUrl: config.mainIcons[index].iconSolid,
             isSelected: selectedIndex == index,
             size: 24,
-            selectedColor: primaryColor,
+            selectedColor: primaryColor, 
             unselectedColor: inactiveColor,
           ),
         ),
         textStyle: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w600,
-          color: primaryColor,
+          color: primaryColor, 
         ),
       ),
     );
