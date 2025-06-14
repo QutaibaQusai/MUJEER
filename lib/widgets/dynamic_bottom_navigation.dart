@@ -20,6 +20,10 @@ class DynamicBottomNavigation extends StatelessWidget {
   Widget build(BuildContext context) {
     final config = ConfigService().config;
     if (config == null) return const SizedBox.shrink();
+    
+    final primaryColor = _parseColorFromConfig(config.theme.primaryColor);
+        debugPrint('color nav bar $primaryColor');
+
 
     return Container(
       decoration: BoxDecoration(
@@ -41,19 +45,17 @@ class DynamicBottomNavigation extends StatelessWidget {
             haptic: true,
             tabBorderRadius: 25,
             tabActiveBorder: Border.all(
-              color: Color(0xFFFAB510),
+              color: primaryColor,
               width: 1,
-            ), 
+            ),
             tabBorder: Border.all(color: Colors.transparent, width: 1),
             curve: Curves.easeIn,
             duration: const Duration(milliseconds: 200),
             gap: 8,
             color: Colors.white,
-            activeColor: Color(0xFFFAB510), 
+            activeColor: primaryColor,
             iconSize: 24,
-            tabBackgroundColor: Color(
-              0xFFFAB510,
-            ).withOpacity(0.2),
+            tabBackgroundColor: primaryColor.withOpacity(0.2),
             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
             selectedIndex: selectedIndex,
             onTabChange: (index) {
@@ -64,7 +66,7 @@ class DynamicBottomNavigation extends StatelessWidget {
             tabs: _buildNavigationTabs(
               context,
               config,
-              Color(0xFFFAB510),
+              primaryColor,
               Colors.white,
             ),
           ),
@@ -75,41 +77,22 @@ class DynamicBottomNavigation extends StatelessWidget {
 
   Color _parseColorFromConfig(String colorValue) {
     try {
-
       String cleanColor = colorValue.trim();
 
       if (cleanColor.startsWith('0x')) {
         cleanColor = cleanColor.substring(2);
-
-        if (cleanColor.length == 6) {
-          cleanColor = 'FF$cleanColor'; 
-        }
-
-        final colorInt = int.parse(cleanColor, radix: 16);
-        final color = Color(colorInt);
-        return color;
+        if (cleanColor.length == 6) cleanColor = 'FF$cleanColor';
+        return Color(int.parse(cleanColor, radix: 16));
       } else if (cleanColor.startsWith('#')) {
-        cleanColor = cleanColor.substring(1); 
-
-        if (cleanColor.length == 6) {
-          cleanColor = 'FF$cleanColor'; 
-        }
-
-        final colorInt = int.parse(cleanColor, radix: 16);
-        final color = Color(colorInt);
-        return color;
+        cleanColor = cleanColor.substring(1);
+        if (cleanColor.length == 6) cleanColor = 'FF$cleanColor';
+        return Color(int.parse(cleanColor, radix: 16));
       } else {
-        if (cleanColor.length == 6) {
-          cleanColor = 'FF$cleanColor'; 
-        }
-
-        final colorInt = int.parse(cleanColor, radix: 16);
-        final color = Color(colorInt);
-        return color;
+        if (cleanColor.length == 6) cleanColor = 'FF$cleanColor';
+        return Color(int.parse(cleanColor, radix: 16));
       }
     } catch (e) {
-    
-      return const Color.fromARGB(255, 255, 255, 255); 
+      return const Color.fromARGB(255, 255, 255, 255); // default fallback
     }
   }
 
@@ -132,14 +115,14 @@ class DynamicBottomNavigation extends StatelessWidget {
             iconSolidUrl: config.mainIcons[index].iconSolid,
             isSelected: selectedIndex == index,
             size: 24,
-            selectedColor: primaryColor, 
+            selectedColor: primaryColor,
             unselectedColor: inactiveColor,
           ),
         ),
         textStyle: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w600,
-          color: primaryColor, 
+          color: primaryColor,
         ),
       ),
     );
