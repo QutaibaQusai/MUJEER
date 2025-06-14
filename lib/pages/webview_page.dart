@@ -730,10 +730,7 @@ class _WebViewPageState extends State<WebViewPage> {
       return NavigationDecision.prevent;
     }
 
-    // For all service-related URLs, prevent navigation (they'll be handled by JavaScript)
-    if (request.url.startsWith('dark-mode://') ||
-        request.url.startsWith('light-mode://') ||
-        request.url.startsWith('system-mode://') ||
+    if (
         request.url.startsWith('logout://') ||
         request.url.startsWith('get-location://') ||
         request.url.startsWith('get-contacts://') ||
@@ -745,7 +742,6 @@ class _WebViewPageState extends State<WebViewPage> {
         request.url.startsWith('prompt://') ||
         request.url.contains('barcode') ||
         request.url.contains('scan')) {
-      // These will be handled by the re-injected JavaScript
       return NavigationDecision.prevent;
     }
 

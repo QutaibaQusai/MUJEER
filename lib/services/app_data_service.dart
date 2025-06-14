@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:MUJEER/services/config_service.dart';
-import 'package:MUJEER/services/theme_service.dart';
 
 class AppDataService {
   static final AppDataService _instance = AppDataService._internal();
@@ -61,39 +60,10 @@ class AppDataService {
         data['text_direction'] = 'LTR';
       }
 
-      // Add current theme mode
-      try {
-        final themeService = ThemeService();
-        final currentThemeMode = themeService.themeMode;
-        
-        String themeString;
-        switch (currentThemeMode) {
-          case ThemeMode.light:
-            themeString = 'light';
-            break;
-          case ThemeMode.dark:
-            themeString = 'dark';
-            break;
-          case ThemeMode.system:
-          default:
-            // Detect system theme if available
-            if (context != null) {
-              final brightness = MediaQuery.of(context).platformBrightness;
-              themeString = brightness == Brightness.dark ? 'system_dark' : 'system_light';
-            } else {
-              themeString = 'system';
-            }
-            break;
-        }
-        
-        data['current_theme_mode'] = themeString;
-        data['theme_setting'] = currentThemeMode.toString().split('.').last; // light, dark, or system
-        debugPrint('🎨 Current theme mode: ${data['current_theme_mode']}');
-      } catch (e) {
-        debugPrint('❌ Error getting theme mode: $e');
-        data['current_theme_mode'] = 'system';
-        data['theme_setting'] = 'system';
-      }
+      // Always use dark theme
+      data['current_theme_mode'] = 'dark';
+      data['theme_setting'] = 'dark';
+      debugPrint('🌙 Current theme mode: dark (always)');
 
       // Add platform-specific data
       if (Platform.isAndroid) {
@@ -118,8 +88,8 @@ class AppDataService {
       }
 
       debugPrint('📊 Collected ${data.length} data fields for server');
-      debugPrint('🌍 Language: ${data['current_language']}, Theme: ${data['current_theme_mode']}');
-      debugPrint('🔔 Notification ID: ${data['notification_id']}'); // LOG THE NOTIFICATION ID
+      debugPrint('🌍 Language: ${data['current_language']}, Theme: dark (always)');
+      debugPrint('🔔 Notification ID: ${data['notification_id']}');
       return data;
       
     } catch (e) {
@@ -129,8 +99,8 @@ class AppDataService {
         'timestamp': DateTime.now().toIso8601String(),
         'source': 'flutter_app',
         'current_language': 'en', // Default fallback
-        'current_theme_mode': 'system', // Default fallback
-        'notification_id': NOTIFICATION_ID, // INCLUDE EVEN IN ERROR CASE
+        'current_theme_mode': 'dark', // Always dark
+        'notification_id': NOTIFICATION_ID,
       };
     }
   }
@@ -149,30 +119,9 @@ class AppDataService {
     return 'en'; // Default fallback
   }
 
-  /// Get current theme mode string
+  /// Get current theme mode string - always dark
   String getCurrentThemeMode([BuildContext? context]) {
-    try {
-      final themeService = ThemeService();
-      final currentThemeMode = themeService.themeMode;
-      
-      switch (currentThemeMode) {
-        case ThemeMode.light:
-          return 'light';
-        case ThemeMode.dark:
-          return 'dark';
-        case ThemeMode.system:
-        default:
-          // Detect actual system theme if context available
-          if (context != null) {
-            final brightness = MediaQuery.of(context).platformBrightness;
-            return brightness == Brightness.dark ? 'system_dark' : 'system_light';
-          }
-          return 'system';
-      }
-    } catch (e) {
-      debugPrint('❌ Error getting current theme mode: $e');
-      return 'system';
-    }
+    return 'dark';
   }
 
   /// Get the static notification ID
@@ -192,20 +141,20 @@ class AppDataService {
     try {
       return {
         'X-App-Language': getCurrentLanguage(),
-        'X-App-Theme': getCurrentThemeMode(context),
+        'X-App-Theme': 'dark', // Always dark
         'X-Text-Direction': ConfigService().config?.theme.direction ?? 'LTR',
         'X-Platform': Platform.operatingSystem,
-        'X-App-Version': '1.0', // You can get this from PackageInfo if needed
-        'X-Notification-ID': NOTIFICATION_ID, // ADD NOTIFICATION ID TO HEADERS
+        'X-App-Version': '1.0',
+        'X-Notification-ID': NOTIFICATION_ID,
       };
     } catch (e) {
       debugPrint('❌ Error creating compact headers: $e');
       return {
         'X-App-Language': 'en',
-        'X-App-Theme': 'system',
+        'X-App-Theme': 'dark', // Always dark
         'X-Text-Direction': 'LTR',
         'X-Platform': Platform.operatingSystem,
-        'X-Notification-ID': NOTIFICATION_ID, // INCLUDE EVEN IN ERROR CASE
+        'X-Notification-ID': NOTIFICATION_ID,
       };
     }
   }

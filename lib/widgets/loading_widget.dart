@@ -17,24 +17,23 @@ class LoadingWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     
     return Container(
-      color: backgroundColor ?? (isDarkMode ? Colors.black : Colors.white),
+      color: backgroundColor ?? ( Colors.black ),
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(
-                indicatorColor ?? (isDarkMode ? Colors.white : Colors.black),
+                indicatorColor ?? ( Colors.white ),
               ),
             ),
             const SizedBox(height: 16),
             Text(
               message,
               style: TextStyle(
-                color: textColor ?? (isDarkMode ? Colors.white : Colors.black),
+                color: textColor ?? ( Colors.white),
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),

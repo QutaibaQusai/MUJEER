@@ -18,7 +18,6 @@ class HeaderIconWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     
     return IconButton(
       onPressed: onTap,
@@ -26,12 +25,12 @@ class HeaderIconWidget extends StatelessWidget {
       icon: DynamicIcon(
         iconUrl: iconUrl,
         size: size,
-        color: isDarkMode ? Colors.white : Colors.black,
+        color:  Colors.white ,
         showLoading: false,
         fallbackIcon: Icon(
           Icons.widgets_outlined,
           size: size,
-          color: isDarkMode ? Colors.white : Colors.black,
+          color: Colors.white ,
         ),
       ),
     );

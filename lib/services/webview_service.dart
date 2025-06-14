@@ -11,7 +11,6 @@ import 'package:MUJEER/pages/webview_page.dart';
 import 'package:MUJEER/pages/barcode_scanner_page.dart';
 import 'package:MUJEER/pages/login_page.dart';
 import 'package:MUJEER/widgets/webview_sheet.dart';
-import 'package:MUJEER/services/theme_service.dart';
 import 'package:MUJEER/services/auth_service.dart';
 import 'package:MUJEER/services/location_service.dart';
 import 'package:MUJEER/services/contacts_service.dart';
@@ -94,13 +93,6 @@ class WebViewService {
         onMessageReceived: (JavaScriptMessage message) {
           debugPrint('📸 Barcode message: ${message.message}');
           _handleBarcodeRequest(message.message);
-        },
-      )
-      ..addJavaScriptChannel(
-        'ThemeManager',
-        onMessageReceived: (JavaScriptMessage message) {
-          debugPrint('🎨 Theme message: ${message.message}');
-          _handleThemeChange(message.message);
         },
       )
       ..addJavaScriptChannel(
@@ -198,31 +190,31 @@ class WebViewService {
     return controller;
   }
 
-void _handleToastRequest(String message) {
-  if (_currentContext == null) {
-    debugPrint('❌ No context available for toast request');
-    return;
-  }
-
-  if (!_currentContext!.mounted) {
-    debugPrint('❌ Context is no longer mounted for toast request');
-    return;
-  }
-
-  debugPrint('🍞 Processing toast request: $message');
-
-  try {
-    // Extract toast message from URL
-    String toastMessage = _extractToastMessage(message);
-
-    if (toastMessage.isEmpty) {
-      debugPrint('❌ Empty toast message');
+  void _handleToastRequest(String message) {
+    if (_currentContext == null) {
+      debugPrint('❌ No context available for toast request');
       return;
     }
 
-    // ✅ ENHANCED: Flutter SnackBar-style black toast with white font
-    if (_currentController != null) {
-      _currentController!.runJavaScript('''
+    if (!_currentContext!.mounted) {
+      debugPrint('❌ Context is no longer mounted for toast request');
+      return;
+    }
+
+    debugPrint('🍞 Processing toast request: $message');
+
+    try {
+      // Extract toast message from URL
+      String toastMessage = _extractToastMessage(message);
+
+      if (toastMessage.isEmpty) {
+        debugPrint('❌ Empty toast message');
+        return;
+      }
+
+      // ✅ ENHANCED: Flutter SnackBar-style black toast with white font
+      if (_currentController != null) {
+        _currentController!.runJavaScript('''
         try {
           console.log('🍞 Toast message received in WebView: $toastMessage');
           
@@ -341,13 +333,15 @@ void _handleToastRequest(String message) {
           console.error('❌ Error handling toast in WebView:', error);
         }
       ''');
-    }
+      }
 
-    debugPrint('✅ Enhanced black toast processed via web scripts: $toastMessage');
-  } catch (e) {
-    debugPrint('❌ Error handling toast request: $e');
+      debugPrint(
+        '✅ Enhanced black toast processed via web scripts: $toastMessage',
+      );
+    } catch (e) {
+      debugPrint('❌ Error handling toast request: $e');
+    }
   }
-}
 
   String _extractToastMessage(String url) {
     try {
@@ -533,22 +527,6 @@ void _handleToastRequest(String message) {
     }
     if (request.url.startsWith('toast://')) {
       _handleToastRequest(request.url);
-      return NavigationDecision.prevent;
-    }
-    // Handle theme requests
-    if (request.url.startsWith('dark-mode://')) {
-      _handleThemeChange('dark');
-      return NavigationDecision.prevent;
-    }
-    // Handle theme requests
-    if (request.url.startsWith('dark-mode://')) {
-      _handleThemeChange('dark');
-      return NavigationDecision.prevent;
-    } else if (request.url.startsWith('light-mode://')) {
-      _handleThemeChange('light');
-      return NavigationDecision.prevent;
-    } else if (request.url.startsWith('system-mode://')) {
-      _handleThemeChange('system');
       return NavigationDecision.prevent;
     }
     // Handle auth requests
@@ -784,85 +762,6 @@ void _handleToastRequest(String message) {
     }
   }
 
-  void _showPdfSaveLoadingDialog(String pdfUrl) {
-    if (_currentContext == null) return;
-
-    showDialog(
-      context: _currentContext!,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
-              Text(
-                'Downloading PDF...',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 8),
-              Text(
-                Uri.parse(pdfUrl).pathSegments.last.replaceAll('.pdf', '') +
-                    '.pdf',
-                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  void _showPdfSavedDialog(String filePath, String fileName) {
-    if (_currentContext == null) return;
-
-    showDialog(
-      context: _currentContext!,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Row(
-            children: [
-              Icon(Icons.picture_as_pdf, color: Colors.red),
-              SizedBox(width: 8),
-              Text('PDF Saved'),
-            ],
-          ),
-          content: Text(
-            '$fileName has been saved successfully. Would you like to open it?',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text('Later'),
-            ),
-            TextButton(
-              onPressed: () async {
-                Navigator.of(context).pop();
-
-                final result = await PdfSaverService().openPdf(filePath);
-
-                if (!result['success']) {
-                  ScaffoldMessenger.of(_currentContext!).showSnackBar(
-                    SnackBar(
-                      content: Text(result['error'] ?? 'Could not open PDF'),
-                      backgroundColor: Colors.orange,
-                    ),
-                  );
-                }
-              },
-              child: Text('Open PDF'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   void _sendPdfSaveToWebView(Map<String, dynamic> result) {
     if (_currentController == null) {
       debugPrint('❌ No WebView controller available for PDF save result');
@@ -981,39 +880,6 @@ void _handleToastRequest(String message) {
     }
   }
 
-  void _showImageSaveLoadingDialog(String imageUrl) {
-    if (_currentContext == null) return;
-
-    showDialog(
-      context: _currentContext!,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
-              Text(
-                'Saving image...',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 8),
-              Text(
-                Uri.parse(imageUrl).pathSegments.last,
-                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   void _sendImageSaveToWebView(Map<String, dynamic> result) {
     if (_currentController == null) {
       debugPrint('❌ No WebView controller available for image save result');
@@ -1116,31 +982,6 @@ void _handleToastRequest(String message) {
     }
   }
 
-  void _showScreenshotLoadingDialog() {
-    if (_currentContext == null) return;
-
-    showDialog(
-      context: _currentContext!,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
-              Text(
-                'Taking screenshot...',
-                style: TextStyle(fontSize: 16),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   void _sendScreenshotToWebView(Map<String, dynamic> screenshotData) {
     if (_currentController == null) {
       debugPrint('❌ No WebView controller available for screenshot result');
@@ -1240,31 +1081,6 @@ void _handleToastRequest(String message) {
         'contacts': [],
       });
     }
-  }
-
-  void _showContactsLoadingDialog() {
-    if (_currentContext == null) return;
-
-    showDialog(
-      context: _currentContext!,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
-              Text(
-                'Loading contacts...',
-                style: TextStyle(fontSize: 16),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        );
-      },
-    );
   }
 
   void _sendContactsToWebView(Map<String, dynamic> contactsData) {
@@ -1403,31 +1219,6 @@ void _handleToastRequest(String message) {
         'errorCode': 'UNKNOWN_ERROR',
       });
     }
-  }
-
-  void _showLocationLoadingDialog() {
-    if (_currentContext == null) return;
-
-    showDialog(
-      context: _currentContext!,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
-              Text(
-                'Getting your location...',
-                style: TextStyle(fontSize: 16),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        );
-      },
-    );
   }
 
   void _sendLocationToWebView(Map<String, dynamic> locationData) {
@@ -1630,28 +1421,6 @@ void _handleToastRequest(String message) {
   ''');
 
     // REMOVED: Native SnackBar code
-  }
-
-  void _handleThemeChange(String themeMode) {
-    if (_currentContext != null) {
-      final themeService = Provider.of<ThemeService>(
-        _currentContext!,
-        listen: false,
-      );
-      themeService.updateThemeMode(themeMode);
-
-      // Use web scripts instead of native SnackBar
-      final message = 'Theme changed to ${themeMode.toUpperCase()} mode';
-      if (_currentController != null) {
-        _currentController!.runJavaScript('''
-        if (window.ToastManager) {
-          window.ToastManager.postMessage('toast://' + encodeURIComponent('$message'));
-        } else {
-          window.location.href = 'toast://' + encodeURIComponent('$message');
-        }
-      ''');
-      }
-    }
   }
 
   void _injectJavaScript(WebViewController controller) {
@@ -2347,19 +2116,7 @@ createBlackToast: function(message) {
         }
       },
       
-      // Theme System
-      setTheme: function(theme) {
-        console.log('🎨 Setting theme to:', theme);
-        if (window.ThemeManager) {
-          if (['dark', 'light', 'system'].includes(theme)) {
-            window.ThemeManager.postMessage(theme);
-          } else {
-            console.error('❌ Invalid theme. Use: dark, light, or system');
-          }
-        } else {
-          console.error('❌ ThemeManager not available');
-        }
-      },
+ 
       
       // Auth System
       logout: function() {
@@ -2466,9 +2223,7 @@ createBlackToast: function(message) {
         return !!window.PdfSaver;
       },
       
-      isThemeAvailable: function() {
-        return !!window.ThemeManager;
-      },
+     
       
       isAuthAvailable: function() {
         return !!window.AuthManager;
@@ -2486,7 +2241,7 @@ createBlackToast: function(message) {
           imageSaver: this.isImageSaverAvailable(),
           pdfSaver: this.isPdfSaverAvailable(),
           theme: this.isThemeAvailable(),
-          auth: this.isAuthAvailable()
+           auth: this.isAuthAvailable()
         };
       },
       
@@ -2536,11 +2291,6 @@ createBlackToast: function(message) {
     console.log("    - <a href='take-screenshot://'>Take Screenshot</a>");
     console.log("    - <a href='save-image://https://example.com/image.jpg'>Save Image</a>");
     console.log("    - <a href='save-pdf://https://example.com/doc.pdf'>Save PDF</a>");
-    console.log("  🎨 Theme:");
-    console.log("    - window.ERPForever.setTheme('dark')");
-    console.log("    - <a href='dark-mode://'>Dark Mode</a>");
-    console.log("    - <a href='light-mode://'>Light Mode</a>");
-    console.log("    - <a href='system-mode://'>System Mode</a>");
     console.log("  📱 Barcode:");
     console.log("    - window.ERPForever.scanBarcode() // Single scan");
     console.log("    - window.ERPForever.scanBarcodeContinuous() // Continuous scan");

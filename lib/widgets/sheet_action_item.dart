@@ -20,7 +20,6 @@ class SheetActionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     
     return InkWell(
       onTap: onTap,
@@ -56,7 +55,7 @@ class SheetActionItem extends StatelessWidget {
               title,
               style: TextStyle(
                 fontWeight: FontWeight.w500,
-                color: isDarkMode ? Colors.white : Colors.black,
+                color:  Colors.white ,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

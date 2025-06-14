@@ -173,10 +173,10 @@ class _WebViewSheetState extends State<WebViewSheet> {
       _handleNewWebNavigation(request.url);
       return NavigationDecision.prevent;
     }
-if (request.url.startsWith('toast://')) {
-    _handleToastRequest(request.url);
-    return NavigationDecision.prevent;
-  }
+    if (request.url.startsWith('toast://')) {
+      _handleToastRequest(request.url);
+      return NavigationDecision.prevent;
+    }
     // Handle new-sheet:// requests
     if (request.url.startsWith('new-sheet://')) {
       _handleSheetNavigation(request.url);
@@ -213,39 +213,40 @@ if (request.url.startsWith('toast://')) {
     // Allow normal navigation for other URLs
     return NavigationDecision.navigate;
   }
+
   void _handleToastRequest(String url) {
-  debugPrint('🍞 Toast requested from WebViewSheet: $url');
-  
-  try {
-    // Extract message from the URL
-    String message = url.replaceFirst('toast://', '');
-    
-    // Decode URL encoding if present
-    message = Uri.decodeComponent(message);
-    
-    // Show the toast message
-    if (mounted && message.isNotEmpty) {
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          duration: const Duration(seconds: 3),
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.green,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+    debugPrint('🍞 Toast requested from WebViewSheet: $url');
+
+    try {
+      // Extract message from the URL
+      String message = url.replaceFirst('toast://', '');
+
+      // Decode URL encoding if present
+      message = Uri.decodeComponent(message);
+
+      // Show the toast message
+      if (mounted && message.isNotEmpty) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            duration: const Duration(seconds: 3),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.green,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
-        ),
-      );
-      
-      debugPrint('✅ Toast shown in sheet: $message');
-    } else {
-      debugPrint('❌ Empty toast message');
+        );
+
+        debugPrint('✅ Toast shown in sheet: $message');
+      } else {
+        debugPrint('❌ Empty toast message');
+      }
+    } catch (e) {
+      debugPrint('❌ Error handling toast request in sheet: $e');
     }
-  } catch (e) {
-    debugPrint('❌ Error handling toast request in sheet: $e');
   }
-}
 
   void _handleExternalNavigation(String url) {
     debugPrint('🌐 External navigation detected in WebViewSheet: $url');
@@ -284,43 +285,43 @@ if (request.url.startsWith('toast://')) {
   }
 
   Future<void> _launchInDefaultBrowser(String url) async {
-  try {
-    debugPrint('🌐 Opening URL in default browser: $url');
+    try {
+      debugPrint('🌐 Opening URL in default browser: $url');
 
-    final Uri uri = Uri.parse(url);
+      final Uri uri = Uri.parse(url);
 
-    if (await canLaunchUrl(uri)) {
-      final bool launched = await launchUrl(
-        uri,
-        mode: LaunchMode.externalApplication,
-      );
+      if (await canLaunchUrl(uri)) {
+        final bool launched = await launchUrl(
+          uri,
+          mode: LaunchMode.externalApplication,
+        );
 
-      if (launched) {
-        debugPrint('✅ Successfully opened URL in default browser');
+        if (launched) {
+          debugPrint('✅ Successfully opened URL in default browser');
 
-        // Use web scripts instead of native SnackBar
-        if (mounted) {
-          _controller.runJavaScript('''
+          // Use web scripts instead of native SnackBar
+          if (mounted) {
+            _controller.runJavaScript('''
             if (window.ToastManager) {
               window.ToastManager.postMessage('toast://' + encodeURIComponent('Opening in browser...'));
             } else {
               window.location.href = 'toast://' + encodeURIComponent('Opening in browser...');
             }
           ''');
+          }
+        } else {
+          debugPrint('❌ Failed to launch URL in browser');
+          _showUrlError('Could not open URL in browser');
         }
       } else {
-        debugPrint('❌ Failed to launch URL in browser');
-        _showUrlError('Could not open URL in browser');
+        debugPrint('❌ Cannot launch URL: $url');
+        _showUrlError('Cannot open this type of URL');
       }
-    } else {
-      debugPrint('❌ Cannot launch URL: $url');
-      _showUrlError('Cannot open this type of URL');
+    } catch (e) {
+      debugPrint('❌ Error launching URL in browser: $e');
+      _showUrlError('Failed to open browser: ${e.toString()}');
     }
-  } catch (e) {
-    debugPrint('❌ Error launching URL in browser: $e');
-    _showUrlError('Failed to open browser: ${e.toString()}');
   }
-}
 
   void _handleNewWebNavigation(String url) {
     debugPrint('🌐 Opening new WebView from sheet: $url');
@@ -379,9 +380,9 @@ if (request.url.startsWith('toast://')) {
     );
   }
 
-void _showUrlError(String message) {
-  if (mounted) {
-    _controller.runJavaScript('''
+  void _showUrlError(String message) {
+    if (mounted) {
+      _controller.runJavaScript('''
       const errorMessage = '$message';
       if (window.AlertManager) {
         window.AlertManager.postMessage('alert://' + encodeURIComponent(errorMessage));
@@ -389,8 +390,8 @@ void _showUrlError(String message) {
         window.location.href = 'alert://' + encodeURIComponent(errorMessage);
       }
     ''');
+    }
   }
-}
 
   Future<void> _handleJavaScriptRefresh() async {
     debugPrint('🔄 Processing sheet refresh request...');
@@ -434,8 +435,9 @@ void _showUrlError(String message) {
       }
     });
   }
-void _setupSheetPage() {
-  _controller.runJavaScript('''
+
+  void _setupSheetPage() {
+    _controller.runJavaScript('''
     console.log('🔧 Setting up sheet page for optimal scrolling...');
     
     // ENHANCED: Prevent pull-to-refresh during content updates
@@ -485,7 +487,8 @@ void _setupSheetPage() {
     
     setTimeout(monitorDynamicContent, 1000);
   ''');
-}
+  }
+
   void _reinjectWebViewServiceJS() {
     debugPrint('💉 Re-injecting WebViewService JavaScript in WebViewSheet...');
 
@@ -916,28 +919,29 @@ void _setupSheetPage() {
   ''');
   }
 
- void _injectScrollAndRefreshMonitoring() {
-  try {
-    debugPrint('🔄 Using PullToRefreshService for WebViewSheet...');
+  void _injectScrollAndRefreshMonitoring() {
+    try {
+      debugPrint('🔄 Using PullToRefreshService for WebViewSheet...');
 
-    // Use the reusable service for pull-to-refresh
-    PullToRefreshService().injectNativePullToRefresh(
-      controller: _controller,
-      context: RefreshContext.sheetWebView,
-      refreshChannelName: _refreshChannelName,
-      flutterContext: context, // Pass Flutter context for theme detection
-    );
+      // Use the reusable service for pull-to-refresh
+      PullToRefreshService().injectNativePullToRefresh(
+        controller: _controller,
+        context: RefreshContext.sheetWebView,
+        refreshChannelName: _refreshChannelName,
+        flutterContext: context, // Pass Flutter context for theme detection
+      );
 
-    // Keep the scroll monitoring part (this is specific to WebViewSheet)
-    _injectScrollMonitoring();
+      // Keep the scroll monitoring part (this is specific to WebViewSheet)
+      _injectScrollMonitoring();
 
-    debugPrint('✅ PullToRefreshService injected for WebViewSheet');
-  } catch (e) {
-    debugPrint('❌ Error injecting refresh for WebViewSheet: $e');
+      debugPrint('✅ PullToRefreshService injected for WebViewSheet');
+    } catch (e) {
+      debugPrint('❌ Error injecting refresh for WebViewSheet: $e');
+    }
   }
-}
-void _injectScrollMonitoring() {
-  _controller.runJavaScript('''
+
+  void _injectScrollMonitoring() {
+    _controller.runJavaScript('''
     (function () {
       console.log('📍 Starting scroll monitoring for WebViewSheet...');
       
@@ -971,7 +975,8 @@ void _injectScrollMonitoring() {
       console.log('✅ WebViewSheet scroll monitoring ready');
     })();
   ''');
-}
+  }
+
   Future<bool> _onWillPop() async {
     try {
       if (await _controller.canGoBack()) {
@@ -1017,14 +1022,13 @@ void _injectScrollMonitoring() {
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Container(
         height: MediaQuery.of(context).size.height * widget.heightFactor,
         decoration: BoxDecoration(
-          color: isDarkMode ? Colors.black : Colors.white,
+          color:  Colors.black ,
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(20),
             topRight: Radius.circular(20),
@@ -1032,15 +1036,15 @@ void _injectScrollMonitoring() {
         ),
         child: Column(
           children: [
-            _buildSheetHeader(context, isDarkMode),
-            Expanded(child: _buildWebViewContent(isDarkMode)),
+            _buildSheetHeader(context),
+            Expanded(child: _buildWebViewContent()),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildWebViewContent(bool isDarkMode) {
+  Widget _buildWebViewContent() {
     return Container(
       decoration: const BoxDecoration(
         borderRadius: BorderRadius.only(
@@ -1060,16 +1064,17 @@ void _injectScrollMonitoring() {
               Factory<PanGestureRecognizer>(PanGestureRecognizer.new),
             },
           ),
-          if (_isLoading) _buildLoadingIndicator(isDarkMode),
+          if (_isLoading) _buildLoadingIndicator(),
         ],
       ),
     );
   }
 
-  Widget _buildSheetHeader(BuildContext context, bool isDarkMode) {
+
+  Widget _buildSheetHeader(BuildContext context,) {
     return Container(
       decoration: BoxDecoration(
-        color: isDarkMode ? Colors.grey[900] : Colors.white,
+        color:  Colors.grey[900] ,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(20),
           topRight: Radius.circular(20),
@@ -1084,7 +1089,7 @@ void _injectScrollMonitoring() {
             height: 5,
             width: 40,
             decoration: BoxDecoration(
-              color: isDarkMode ? Colors.grey[600] : Colors.grey[400],
+              color:  Colors.grey[600] ,
               borderRadius: BorderRadius.circular(2.5),
             ),
           ),
@@ -1096,7 +1101,7 @@ void _injectScrollMonitoring() {
                   IconButton(
                     icon: Icon(
                       Icons.arrow_back,
-                      color: isDarkMode ? Colors.white : Colors.black,
+                      color:Colors.white ,
                       size: 24,
                     ),
                     onPressed: _goBack,
@@ -1109,7 +1114,7 @@ void _injectScrollMonitoring() {
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w600,
-                      color: isDarkMode ? Colors.white : Colors.black,
+                      color:Colors.white,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -1118,7 +1123,7 @@ void _injectScrollMonitoring() {
                 IconButton(
                   icon: Icon(
                     Icons.close,
-                    color: isDarkMode ? Colors.white : Colors.black,
+                    color:  Colors.white ,
                     size: 24,
                   ),
                   onPressed: () {
@@ -1141,10 +1146,10 @@ void _injectScrollMonitoring() {
     );
   }
 
-  Widget _buildLoadingIndicator(bool isDarkMode) {
+  Widget _buildLoadingIndicator() {
     return Container(
       decoration: BoxDecoration(
-        color: (isDarkMode ? Colors.black : Colors.white).withOpacity(0.95),
+        color: ( Colors.black ),
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(20),
           bottomRight: Radius.circular(20),
@@ -1156,7 +1161,7 @@ void _injectScrollMonitoring() {
           children: [
             CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(
-                isDarkMode ? Colors.white : Colors.black,
+               Colors.white ,
               ),
               strokeWidth: 3,
             ),
@@ -1164,7 +1169,7 @@ void _injectScrollMonitoring() {
             Text(
               'Loading...',
               style: TextStyle(
-                color: isDarkMode ? Colors.white : Colors.black,
+                color:  Colors.white ,
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
                 letterSpacing: 0.5,

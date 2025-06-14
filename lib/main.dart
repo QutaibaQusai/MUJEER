@@ -1,4 +1,4 @@
-// lib/main.dart - COMPLETE: Enhanced with offline handling
+// lib/main.dart - UPDATED: Always dark theme
 import 'package:MUJEER/services/refresh_state_manager.dart';
 import 'package:MUJEER/themes/dynamic_theme.dart';
 import 'package:MUJEER/widgets/connection_status_widget.dart';
@@ -49,8 +49,8 @@ void main() async {
     debugPrint('⚠️ Using fallback configuration');
   }
 
-  // Load saved theme
-  final savedTheme = await themeService.getSavedThemeMode();
+  // No need to load saved theme since it's always dark
+  debugPrint('🌙 Theme: Always dark mode');
 
   // Check authentication state
   final isLoggedIn = await authService.checkAuthState();
@@ -69,7 +69,6 @@ void main() async {
         ChangeNotifierProvider.value(value: internetService), 
       ],
       child: MyApp(
-        initialThemeMode: savedTheme, 
         isLoggedIn: isLoggedIn,
         hasInternet: internetService.isConnected,
       ),
@@ -158,13 +157,11 @@ class SplashStateManager extends ChangeNotifier {
 }
 
 class MyApp extends StatelessWidget {
-  final String initialThemeMode;
   final bool? isLoggedIn;
   final bool hasInternet;
 
   const MyApp({
     super.key, 
-    required this.initialThemeMode, 
     this.isLoggedIn,
     required this.hasInternet,
   });
@@ -200,9 +197,9 @@ class MyApp extends StatelessWidget {
           child: MaterialApp(
             debugShowCheckedModeBanner: false,
             title: 'ERPForever',
-            themeMode: themeService.themeMode,
-            theme: DynamicTheme.buildLightTheme(configService.config),
-            darkTheme: DynamicTheme.buildDarkTheme(configService.config),
+            themeMode: ThemeMode.dark, // Always dark
+            theme: DynamicTheme.buildTheme(configService.config), // Use single theme method
+            darkTheme: DynamicTheme.buildTheme(configService.config), // Same theme for both
             home: ScreenshotWrapper(
               child: ConnectionStatusWidget(
                 child: _buildHomePage(internetService, shouldShowMainScreen),

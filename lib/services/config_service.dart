@@ -425,59 +425,54 @@ class ConfigService extends ChangeNotifier with WidgetsBindingObserver {
     }
   }
 
-  String _encodeAppDataToString(Map<String, String> appData) {
-    try {
-      final compactData = {
-        'v': appData['app_version'] ?? 'unknown',
-        'p': appData['platform'] ?? 'unknown',
-        'l': appData['current_language'] ?? 'en',
-        't': appData['current_theme_mode'] ?? 'system',
-        'd': appData['text_direction'] ?? 'LTR',
-        'n': appData['notification_id'] ?? AppDataService.NOTIFICATION_ID,
-        'r': appData['user-role'] ?? '',
-        'ts': DateTime.now().millisecondsSinceEpoch.toString(),
-      };
-
-      final jsonString = jsonEncode(compactData);
-      final encodedData = base64Encode(utf8.encode(jsonString));
-
-      return encodedData;
-    } catch (e) {
-      debugPrint('❌ Error encoding app data: $e');
-      return '';
-    }
-  }
-
-  Map<String, String> _buildAppDataHeaders(Map<String, String> appData, [BuildContext? context]) {
-    final headers = <String, String>{
-      'User-Agent': 'ERPForever-Flutter-App/1.0',
-      'Accept': 'application/json',
-      'Cache-Control': 'no-cache',
-
-      'X-Flutter-App-Source': 'flutter_mobile',
-      'X-Flutter-Client-Version': appData['app_version'] ?? 'unknown',
-      'X-Flutter-Platform': appData['platform'] ?? 'unknown',
-      'X-Flutter-Device-Model': appData['device_model'] ?? 'unknown',
-      'X-Flutter-Timestamp': DateTime.now().toIso8601String(),
-
-      'X-Flutter-Language': appData['current_language'] ?? 'en',
-      'X-Flutter-Theme': appData['current_theme_mode'] ?? 'system',
-      'X-Flutter-Direction': appData['text_direction'] ?? 'LTR',
-      'X-Flutter-Theme-Setting': appData['theme_setting'] ?? 'system',
-
-      'X-Flutter-Notification-ID': appData['notification_id'] ?? AppDataService.NOTIFICATION_ID,
+String _encodeAppDataToString(Map<String, String> appData) {
+  try {
+    final compactData = {
+      'v': appData['app_version'] ?? 'unknown',
+      'p': appData['platform'] ?? 'unknown',
+      'l': appData['current_language'] ?? 'en',
+      't': 'dark', // Always dark
+      'd': appData['text_direction'] ?? 'LTR',
+      'n': appData['notification_id'] ?? AppDataService.NOTIFICATION_ID,
+      'r': appData['user-role'] ?? '',
+      'ts': DateTime.now().millisecondsSinceEpoch.toString(),
     };
 
-    if (_userRole != null && _userRole!.isNotEmpty) {
-      headers['X-User-Role'] = _userRole!;
-    }
+    final jsonString = jsonEncode(compactData);
+    final encodedData = base64Encode(utf8.encode(jsonString));
 
-    return headers;
+    return encodedData;
+  } catch (e) {
+    debugPrint('❌ Error encoding app data: $e');
+    return '';
+  }
+}
+  Map<String, String> _buildAppDataHeaders(Map<String, String> appData, [BuildContext? context]) {
+  final headers = <String, String>{
+    'User-Agent': 'ERPForever-Flutter-App/1.0',
+    'Accept': 'application/json',
+    'Cache-Control': 'no-cache',
+
+    'X-Flutter-App-Source': 'flutter_mobile',
+    'X-Flutter-Client-Version': appData['app_version'] ?? 'unknown',
+    'X-Flutter-Platform': appData['platform'] ?? 'unknown',
+    'X-Flutter-Device-Model': appData['device_model'] ?? 'unknown',
+    'X-Flutter-Timestamp': DateTime.now().toIso8601String(),
+
+    'X-Flutter-Language': appData['current_language'] ?? 'en',
+    'X-Flutter-Theme': 'dark', // Always dark
+    'X-Flutter-Direction': appData['text_direction'] ?? 'LTR',
+    'X-Flutter-Theme-Setting': 'dark', // Always dark
+
+    'X-Flutter-Notification-ID': appData['notification_id'] ?? AppDataService.NOTIFICATION_ID,
+  };
+
+  if (_userRole != null && _userRole!.isNotEmpty) {
+    headers['X-User-Role'] = _userRole!;
   }
 
-  // REMOVED: _tryLoadCachedConfig method
-  // REMOVED: _tryLoadLocalConfig method
-  // REMOVED: _loadDefaultConfig method
+  return headers;
+}
 
   Future<void> _cacheConfiguration() async {
     try {
@@ -583,18 +578,9 @@ class ConfigService extends ChangeNotifier with WidgetsBindingObserver {
     return Color(int.parse(hexColor.replaceFirst('#', '0xFF')));
   }
 
-  ThemeMode getThemeMode() {
-    if (_config == null) return ThemeMode.system;
-
-    switch (_config!.theme.defaultMode) {
-      case 'dark':
-        return ThemeMode.dark;
-      case 'light':
-        return ThemeMode.light;
-      default:
-        return ThemeMode.system;
-    }
-  }
+ThemeMode getThemeMode() {
+  return ThemeMode.dark;
+}
 
   TextDirection getTextDirection() {
     if (_config == null) return TextDirection.ltr;

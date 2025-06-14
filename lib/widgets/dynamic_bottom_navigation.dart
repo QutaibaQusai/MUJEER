@@ -21,16 +21,14 @@ class DynamicBottomNavigation extends StatelessWidget {
     final config = ConfigService().config;
     if (config == null) return const SizedBox.shrink();
 
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     final primaryColor = getColorFromHex(config.theme.primaryColor);
     debugPrint('$primaryColor ');
 
-    final inactiveColor = isDarkMode ? Colors.grey[400]! : Colors.grey[600]!;
 
     return Container(
       decoration: BoxDecoration(
-        color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+        color:  const Color(0xFF1E1E1E) ,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
@@ -43,8 +41,8 @@ class DynamicBottomNavigation extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8),
           child: GNav(
-            rippleColor: isDarkMode ? Colors.grey[800]! : Colors.grey[300]!,
-            hoverColor: isDarkMode ? Colors.grey[700]! : Colors.grey[100]!,
+            rippleColor:  Colors.grey[800]! ,
+            hoverColor:  Colors.grey[700]! ,
             haptic: true,
             tabBorderRadius: 25,
             tabActiveBorder: Border.all(color: primaryColor, width: 1),
@@ -52,7 +50,7 @@ class DynamicBottomNavigation extends StatelessWidget {
             curve: Curves.easeIn,
             duration: const Duration(milliseconds: 200),
             gap: 8,
-            color: inactiveColor,
+            color: Colors.white,
             activeColor: primaryColor,
             iconSize: 24,
             tabBackgroundColor: primaryColor.withOpacity(0.2),
@@ -67,7 +65,7 @@ class DynamicBottomNavigation extends StatelessWidget {
               context,
               config,
               primaryColor,
-              inactiveColor,
+              Colors.white,
             ),
           ),
         ),

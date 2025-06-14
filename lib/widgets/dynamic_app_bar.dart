@@ -20,32 +20,33 @@ class DynamicAppBar extends StatelessWidget implements PreferredSizeWidget {
     }
 
     final currentItem = config.mainIcons[selectedIndex];
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final titleColor = isDarkMode ? Colors.white : Colors.black;
+    final titleColor = Colors.white;
 
     // Check if we have header icons and separate the first one
-    final hasHeaderIcons = currentItem.headerIcons != null && currentItem.headerIcons!.isNotEmpty;
-    final firstHeaderIcon = hasHeaderIcons ? currentItem.headerIcons!.first : null;
-    final remainingHeaderIcons = hasHeaderIcons 
-        ? currentItem.headerIcons!.sublist(1) 
-        : <dynamic>[];
+    final hasHeaderIcons =
+        currentItem.headerIcons != null && currentItem.headerIcons!.isNotEmpty;
+    final firstHeaderIcon =
+        hasHeaderIcons ? currentItem.headerIcons!.first : null;
+    final remainingHeaderIcons =
+        hasHeaderIcons ? currentItem.headerIcons!.sublist(1) : <dynamic>[];
 
     return AppBar(
       centerTitle: true,
-      leading: firstHeaderIcon != null
-          ? HeaderIconWidget(
-              iconUrl: firstHeaderIcon.icon,
-              title: firstHeaderIcon.title,
-              size: 24,
-              onTap: () => _handleHeaderIconTap(context, firstHeaderIcon),
-            )
-          : null,
+      leading:
+          firstHeaderIcon != null
+              ? HeaderIconWidget(
+                iconUrl: firstHeaderIcon.icon,
+                title: firstHeaderIcon.title,
+                size: 24,
+                onTap: () => _handleHeaderIconTap(context, firstHeaderIcon),
+              )
+              : null,
       title: Padding(
         padding: const EdgeInsets.only(right: 10.0),
         child: _buildTitle(context, currentItem.title, titleColor),
       ),
       actions: _buildActions(context, remainingHeaderIcons),
-      backgroundColor: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+      backgroundColor: const Color(0xFF1E1E1E),
       elevation: 0,
       iconTheme: IconThemeData(color: titleColor),
     );
@@ -93,18 +94,16 @@ class DynamicAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   AppBar _buildDefaultAppBar(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
     return AppBar(
       title: Text(
         'ERPForever',
         style: GoogleFonts.rubik(
           fontSize: 24,
           fontWeight: FontWeight.w600,
-          color: isDarkMode ? Colors.white : Colors.black,
+          color: Colors.white,
         ),
       ),
-      backgroundColor: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+      backgroundColor: const Color(0xFF1E1E1E),
       elevation: 0,
     );
   }

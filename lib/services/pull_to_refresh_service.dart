@@ -26,13 +26,7 @@ class PullToRefreshService {
       debugPrint(
         '🔄 Injecting ENHANCED pull-to-refresh for $contextName (tab: $tabIndex)...',
       );
-
-      // Get current theme from Flutter
-      String currentFlutterTheme = 'light';
-      if (flutterContext != null) {
-        final brightness = Theme.of(flutterContext).brightness;
-        currentFlutterTheme = brightness == Brightness.dark ? 'dark' : 'light';
-      }
+      const String currentFlutterTheme = 'dark';
 
       controller.runJavaScript('''
       (function() {
@@ -64,16 +58,14 @@ class PullToRefreshService {
         let canPull = false;
         let hasReachedThreshold = false;
         let refreshBlocked = false;
-        let currentTheme = '$currentFlutterTheme';
-        
+let currentTheme = 'dark'; // Always dark        
         // ENHANCED: Unified content tracking for both main screen and sheet
         window.lastContentChangeTime = window.lastContentChangeTime || 0;
         
-        // Function to detect current theme
-        function detectCurrentTheme() {
-          return currentTheme;
-        }
-        
+      // Function to detect current theme - always dark
+function detectCurrentTheme() {
+  return 'dark';
+}
         // Function to get theme colors
         function getThemeColors(theme) {
           if (theme === 'dark') {
@@ -115,14 +107,7 @@ class PullToRefreshService {
           }
         };
         
-        // Function for Flutter to update theme
-        window.updateRefreshTheme = function(newTheme) {
-          if (newTheme && newTheme !== currentTheme) {
-            console.log('🎨 Flutter theme update for ' + contextName + ': ' + currentTheme + ' → ' + newTheme);
-            currentTheme = newTheme;
-            updateIndicatorTheme();
-            return true;
-          }
+         window.updateRefreshTheme = function(newTheme) {
           return false;
         };
         

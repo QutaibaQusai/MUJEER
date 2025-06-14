@@ -9,7 +9,7 @@ class AdaptiveAppBar extends StatelessWidget implements PreferredSizeWidget {
   final int selectedIndex;
   final bool showLogo;
   final String? customTitle;
-  
+
   const AdaptiveAppBar({
     super.key,
     required this.selectedIndex,
@@ -25,34 +25,31 @@ class AdaptiveAppBar extends StatelessWidget implements PreferredSizeWidget {
     final config = ConfigService().config;
     if (config == null) return _buildFallbackAppBar(context);
 
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
     return AppBar(
       centerTitle: false,
-      title: _buildAdaptiveTitle(context, isDarkMode),
+      title: _buildAdaptiveTitle(context),
       actions: _buildAdaptiveActions(context, selectedIndex),
-      backgroundColor: isDarkMode ? _hexToColor(config.theme.darkSurface) : Colors.white,
+      backgroundColor: _hexToColor(config.theme.darkSurface),
       elevation: 0,
-      iconTheme: IconThemeData(
-        color: isDarkMode ? Colors.white : Colors.black,
-      ),
+      iconTheme: IconThemeData(color: Colors.white),
     );
   }
 
-  Widget _buildAdaptiveTitle(BuildContext context, bool isDarkMode) {
+  Widget _buildAdaptiveTitle(BuildContext context) {
     if (showLogo) {
       return Container(
         height: 20,
         child: Image.asset(
-          isDarkMode ? "assets/erpforever-white.png" : "assets/header_icon.png",
-          errorBuilder: (context, error, stackTrace) => Text(
-            customTitle ?? 'ERPForever',
-            style: GoogleFonts.rubik(
-              fontSize: 24,
-              fontWeight: FontWeight.w600,
-              color: isDarkMode ? Colors.white : Colors.black,
-            ),
-          ),
+          "assets/erpforever-white.png",
+          errorBuilder:
+              (context, error, stackTrace) => Text(
+                customTitle ?? 'ERPForever',
+                style: GoogleFonts.rubik(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
         ),
       );
     }
@@ -62,7 +59,7 @@ class AdaptiveAppBar extends StatelessWidget implements PreferredSizeWidget {
       style: GoogleFonts.rubik(
         fontSize: 24,
         fontWeight: FontWeight.w600,
-        color: isDarkMode ? Colors.white : Colors.black,
+        color: Colors.white,
       ),
     );
   }
@@ -100,18 +97,16 @@ class AdaptiveAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   AppBar _buildFallbackAppBar(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
     return AppBar(
       title: Text(
-        'ERPForever',
+        'MUJEER',
         style: GoogleFonts.rubik(
           fontSize: 24,
           fontWeight: FontWeight.w600,
-          color: isDarkMode ? Colors.white : Colors.black,
+          color: Colors.white,
         ),
       ),
-      backgroundColor: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+      backgroundColor: const Color(0xFF1E1E1E),
       elevation: 0,
     );
   }

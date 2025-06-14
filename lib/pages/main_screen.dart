@@ -1,11 +1,9 @@
-// lib/pages/main_screen.dart - UPDATED: Preload other tabs after splash
 import 'package:MUJEER/main.dart';
 import 'package:MUJEER/pages/no_internet_page.dart';
 import 'package:MUJEER/services/internet_connection_service.dart';
 import 'package:MUJEER/services/location_service.dart';
 import 'package:MUJEER/services/pull_to_refresh_service.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -869,13 +867,7 @@ Widget build(BuildContext context) {
       return NavigationDecision.prevent;
     }
 
-    // // Theme requests
-    // if (request.url.startsWith('dark-mode://') ||
-    //     request.url.startsWith('light-mode://') ||
-    //     request.url.startsWith('system-mode://')) {
-    //   _handleThemeChangeRequest(request.url);
-    //   return NavigationDecision.prevent;
-    // }
+ 
 
     // Auth requests
     if (request.url.startsWith('logout://')) {
@@ -1560,103 +1552,11 @@ void _performLogout() async {
     }
   }
 }
-void _handleThemeChangeRequest(String url) {
-  String themeMode = 'system';
 
-  if (url.startsWith('dark-mode://')) {
-    themeMode = 'dark';
-  } else if (url.startsWith('light-mode://')) {
-    themeMode = 'light';
-  } else if (url.startsWith('system-mode://')) {
-    themeMode = 'system';
-  }
+ 
 
-  final themeService = Provider.of<ThemeService>(context, listen: false);
-  themeService.updateThemeMode(themeMode);
-
-  // Use web scripts instead of native SnackBar (same as WebViewPage)
-  final message = 'Theme changed to ${themeMode.toUpperCase()} mode';
-  final controller = _controllerManager.getController(
-    _selectedIndex,
-    '',
-    context,
-  );
-  
-  controller.runJavaScript('''
-    if (window.ToastManager) {
-      window.ToastManager.postMessage('toast://' + encodeURIComponent('$message'));
-    } else {
-      window.location.href = 'toast://' + encodeURIComponent('$message');
-    }
-  ''');
-
-  // ✅ KEEP: Notify ALL WebView controllers about theme change
-  _notifyAllControllersThemeChange(themeMode);
-}
-  void _notifyAllControllersThemeChange(String themeMode) {
-    // Get the current theme brightness
-    final brightness = Theme.of(context).brightness;
-    final actualTheme =
-        themeMode == 'system'
-            ? (brightness == Brightness.dark ? 'dark' : 'light')
-            : themeMode;
-
-    debugPrint(
-      '🎨 Notifying all WebView controllers of theme change: $actualTheme',
-    );
-
-    // Notify all active controllers
-    for (int i = 0; i < (_configService.config?.mainIcons.length ?? 0); i++) {
-      try {
-        final controller = _controllerManager.getController(i, '', context);
-        _sendThemeUpdateToController(controller, actualTheme, i);
-      } catch (e) {
-        debugPrint('❌ Error notifying controller $i of theme change: $e');
-      }
-    }
-  }
-
- void _sendThemeUpdateToController(
-  WebViewController controller,
-  String theme,
-  int index,
-) {
-  controller.runJavaScript('''
-    try {
-      console.log('🎨 Flutter theme change notification received: $theme for tab $index');
-      
-      // Update refresh indicator theme if it exists
-      if (typeof window.updateRefreshTheme === 'function') {
-        window.updateRefreshTheme('$theme');
-        console.log('✅ Refresh indicator theme updated to: $theme');
-      }
-      
-      // Call existing theme change handlers
-      if (typeof setDarkMode === 'function' && '$theme' === 'dark') {
-        setDarkMode();
-        console.log("Called setDarkMode()");
-      } else if (typeof setLightMode === 'function' && '$theme' === 'light') {
-        setLightMode();
-        console.log("Called setLightMode()");
-      } else if (typeof window.handleThemeChange === 'function') {
-        window.handleThemeChange('$theme');
-        console.log("Called handleThemeChange with: $theme");
-      } else {
-        var event = new CustomEvent('themeChanged', { 
-          detail: { theme: '$theme', source: 'flutter' } 
-        });
-        document.dispatchEvent(event);
-        console.log("Dispatched themeChanged event for $theme mode");
-      }
-      
-    } catch (error) {
-      console.error("❌ Error handling Flutter theme update:", error);
-    }
-  ''');
-}
 
   void _handleNewWebNavigation(String url) {
-    // FIXED: Changed default URL to mobile.erpforever.com
     String targetUrl = 'https://mobile.erpforever.com/';
 
     if (url.contains('?')) {

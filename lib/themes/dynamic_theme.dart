@@ -1,51 +1,11 @@
-// lib/themes/dynamic_theme.dart
+// lib/themes/dynamic_theme.dart - UPDATED: Only dark theme
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:MUJEER/models/app_config_model.dart';
 
 class DynamicTheme {
-  static ThemeData buildLightTheme(AppConfigModel? config) {
-    final baseTextTheme = GoogleFonts.tajawalTextTheme();
-    
-    final primaryColor = config != null 
-        ? _hexToColor(config.theme.primaryColor)
-        : const Color(0xFF0078d7);
-    
-    final backgroundColor = config != null
-        ? _hexToColor(config.theme.lightBackground)
-        : const Color(0xFFF5F5F5);
-    
-    // Get text direction
-    final isRTL = config?.theme.isRTL ?? false;
-
-    return ThemeData(
-      colorScheme: ColorScheme.fromSeed(seedColor: primaryColor),
-      scaffoldBackgroundColor: backgroundColor,
-      appBarTheme: AppBarTheme(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
-        titleTextStyle: GoogleFonts.tajawal(
-          color: Colors.black,
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-        ),
-        // RTL support for AppBar
-        centerTitle: false,
-        titleSpacing: isRTL ? 0 : NavigationToolbar.kMiddleSpacing,
-      ),
-      // RTL-aware text theme
-      textTheme: baseTextTheme.apply(
-        // For RTL, we might want to adjust text alignment
-        fontFamily: isRTL ? 'Tajawal' : null,
-      ),
-      // RTL-aware visual density
-      visualDensity: VisualDensity.adaptivePlatformDensity,
-      useMaterial3: true,
-    );
-  }
-
-  static ThemeData buildDarkTheme(AppConfigModel? config) {
+  // Only build dark theme now
+  static ThemeData buildTheme(AppConfigModel? config) {
     final baseTextTheme = GoogleFonts.tajawalTextTheme();
     
     final primaryColor = config != null 
@@ -92,6 +52,17 @@ class DynamicTheme {
       visualDensity: VisualDensity.adaptivePlatformDensity,
       useMaterial3: true,
     );
+  }
+
+  // Remove buildLightTheme method completely
+  // Keep for backwards compatibility but always return dark theme
+  static ThemeData buildLightTheme(AppConfigModel? config) {
+    debugPrint('🌙 Light theme requested but returning dark theme (app is always dark)');
+    return buildTheme(config);
+  }
+
+  static ThemeData buildDarkTheme(AppConfigModel? config) {
+    return buildTheme(config);
   }
 
   static Color _hexToColor(String hexColor) {

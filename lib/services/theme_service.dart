@@ -1,48 +1,26 @@
-// lib/services/theme_service.dart
+// lib/services/theme_service.dart - UPDATED: Always dark theme
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class ThemeService extends ChangeNotifier {
-  static const String _themeKey = 'themeMode';
-  
-  ThemeMode _themeMode = ThemeMode.system;
-  ThemeMode get themeMode => _themeMode;
+  // Always use dark theme
+  ThemeMode get themeMode => ThemeMode.dark;
 
   ThemeService() {
-    _loadThemeMode();
+    // No need to load theme mode since it's always dark
+    debugPrint('🌙 ThemeService initialized - Always dark theme');
   }
 
-  Future<void> _loadThemeMode() async {
-    final prefs = await SharedPreferences.getInstance();
-    final themeString = prefs.getString(_themeKey) ?? 'system';
-    _themeMode = _getThemeModeFromString(themeString);
-    notifyListeners();
-  }
+  // Removed getSavedThemeMode method since theme is always dark
 
-  Future<String> getSavedThemeMode() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_themeKey) ?? 'system';
-  }
-
+  // Keep this method for compatibility but it won't change anything
   Future<void> updateThemeMode(String mode) async {
-    final newThemeMode = _getThemeModeFromString(mode);
-    if (_themeMode != newThemeMode) {
-      _themeMode = newThemeMode;
-      notifyListeners();
-      
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_themeKey, mode);
-    }
+    debugPrint('🌙 Theme change requested to: $mode - Ignored (always dark)');
+    // Do nothing - theme is always dark
   }
 
-  ThemeMode _getThemeModeFromString(String mode) {
-    switch (mode) {
-      case 'dark':
-        return ThemeMode.dark;
-      case 'light':
-        return ThemeMode.light;
-      default:
-        return ThemeMode.system;
-    }
-  }
+  // Helper method to check if dark theme
+  bool get isDarkMode => true;
+
+  // Helper method for backwards compatibility
+  String get currentThemeMode => 'dark';
 }

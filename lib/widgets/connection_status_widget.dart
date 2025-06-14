@@ -34,7 +34,6 @@ class ConnectionStatusWidget extends StatelessWidget {
     BuildContext context, 
     InternetConnectionService connectionService,
   ) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     
     return Positioned(
       top: MediaQuery.of(context).padding.top + 8,
@@ -47,14 +46,12 @@ class ConnectionStatusWidget extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           decoration: BoxDecoration(
             // Modern glassmorphism effect
-            color: isDarkMode 
-                ? Colors.red.shade900.withOpacity(0.9)
-                : Colors.red.shade50.withOpacity(0.95),
+            color: Colors.red.shade900.withOpacity(0.9)
+               ,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: isDarkMode 
-                  ? Colors.red.shade700.withOpacity(0.6)
-                  : Colors.red.shade200.withOpacity(0.8),
+              color:  Colors.red.shade700.withOpacity(0.6)
+                  ,
               width: 1.5,
             ),
             boxShadow: [
@@ -65,9 +62,8 @@ class ConnectionStatusWidget extends StatelessWidget {
                 spreadRadius: 0,
               ),
               BoxShadow(
-                color: isDarkMode 
-                    ? Colors.black.withOpacity(0.3)
-                    : Colors.white.withOpacity(0.7),
+                color: Colors.black.withOpacity(0.3)
+                   ,
                 blurRadius: 10,
                 offset: const Offset(0, -2),
                 spreadRadius: 0,
@@ -85,9 +81,8 @@ class ConnectionStatusWidget extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: isDarkMode 
-                          ? Colors.red.shade600.withOpacity(0.3)
-                          : Colors.red.shade100.withOpacity(0.8),
+                      color: Colors.red.shade600.withOpacity(0.3)
+                         ,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: AnimatedBuilder(
@@ -97,7 +92,7 @@ class ConnectionStatusWidget extends StatelessWidget {
                           scale: 0.9 + (_createPulseAnimation().value * 0.2),
                           child: Icon(
                             Icons.wifi_off_rounded,
-                            color: isDarkMode ? Colors.red.shade300 : Colors.red.shade600,
+                            color: Colors.red.shade300 ,
                             size: 22,
                           ),
                         );
@@ -114,7 +109,7 @@ class ConnectionStatusWidget extends StatelessWidget {
                         Text(
                           'No Internet Connection',
                           style: TextStyle(
-                            color: isDarkMode ? Colors.red.shade200 : Colors.red.shade800,
+                            color: Colors.red.shade200 ,
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                             letterSpacing: 0.3,
@@ -124,7 +119,7 @@ class ConnectionStatusWidget extends StatelessWidget {
                         Text(
                           'Tap to retry or see troubleshooting tips',
                           style: TextStyle(
-                            color: isDarkMode ? Colors.red.shade300 : Colors.red.shade600,
+                            color: Colors.red.shade300,
                             fontSize: 12,
                             fontWeight: FontWeight.w400,
                             letterSpacing: 0.2,
@@ -134,7 +129,7 @@ class ConnectionStatusWidget extends StatelessWidget {
                     ),
                   ),
                   // Modern retry button
-                  _buildModernRetryButton(context, connectionService, isDarkMode),
+                  _buildModernRetryButton(context, connectionService),
                 ],
               ),
             ),
@@ -154,14 +149,12 @@ class ConnectionStatusWidget extends StatelessWidget {
   Widget _buildModernRetryButton(
     BuildContext context, 
     InternetConnectionService connectionService,
-    bool isDarkMode,
   ) {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: isDarkMode 
-              ? [Colors.red.shade600, Colors.red.shade700]
-              : [Colors.red.shade500, Colors.red.shade600],
+          colors:[Colors.red.shade600, Colors.red.shade700]
+             ,
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -369,8 +362,6 @@ class ConnectionStatusWidget extends StatelessWidget {
     BuildContext context,
     InternetConnectionService connectionService,
   ) async {
-    final connectionType = await connectionService.getConnectionType();
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     
     showDialog(
       context: context,
@@ -380,8 +371,7 @@ class ConnectionStatusWidget extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: isDarkMode ? Colors.grey.shade900 : Colors.white,
-            borderRadius: BorderRadius.circular(24),
+color: Colors.white ,            borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.3),
@@ -398,15 +388,14 @@ class ConnectionStatusWidget extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: isDarkMode 
-                      ? Colors.red.shade900.withOpacity(0.3)
-                      : Colors.red.shade50,
+                  color:
+                       Colors.red.shade900.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Icon(
                   Icons.wifi_off_rounded,
-                  color: isDarkMode ? Colors.red.shade300 : Colors.red.shade600,
-                  size: 32,
+                  color:  Colors.red.shade300 
+               ,   size: 32,
                 ),
               ),
               const SizedBox(height: 20),
@@ -416,8 +405,7 @@ class ConnectionStatusWidget extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: isDarkMode ? Colors.white : Colors.black,
-                  letterSpacing: 0.3,
+color: Colors.white ,                  letterSpacing: 0.3,
                 ),
               ),
               const SizedBox(height: 8),
@@ -426,36 +414,14 @@ class ConnectionStatusWidget extends StatelessWidget {
                 connectionService.getConnectionMessage(),
                 style: TextStyle(
                   fontSize: 16,
-                  color: isDarkMode ? Colors.grey.shade300 : Colors.grey.shade700,
-                  height: 1.4,
+                  color:  Colors.grey.shade300 
+              ,    height: 1.4,
                 ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
               
-              // Modern status cards
-              // Container(
-              //   padding: const EdgeInsets.all(16),
-              //   decoration: BoxDecoration(
-              //     color: isDarkMode 
-              //         ? Colors.grey.shade800.withOpacity(0.5)
-              //         : Colors.grey.shade50,
-              //     borderRadius: BorderRadius.circular(16),
-              //     border: Border.all(
-              //       color: isDarkMode 
-              //           ? Colors.grey.shade700
-              //           : Colors.grey.shade200,
-              //     ),
-              //   ),
-              //   child: Column(
-              //     children: [
-              //       _buildModernStatusRow('Status', 'Disconnected', Colors.red, isDarkMode),
-              //       const SizedBox(height: 12),
-              //       _buildModernStatusRow('Connection Type', connectionType, Colors.grey, isDarkMode),
-              //     ],
-              //   ),
-              // ),
-             
+        
              
               const SizedBox(height: 24),
               
@@ -476,7 +442,7 @@ class ConnectionStatusWidget extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
+                          color: Colors.grey.shade400,
                         ),
                       ),
                     ),
@@ -532,39 +498,7 @@ class ConnectionStatusWidget extends StatelessWidget {
     );
   }
 
-  // Widget _buildModernStatusRow(String label, String value, Color valueColor, bool isDarkMode) {
-  //   return Row(
-  //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //     children: [
-  //       Text(
-  //         label,
-  //         style: TextStyle(
-  //           fontWeight: FontWeight.w500,
-  //           color: isDarkMode ? Colors.grey.shade300 : Colors.grey.shade700,
-  //           fontSize: 14,
-  //         ),
-  //       ),
-  //       Container(
-  //         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-  //         decoration: BoxDecoration(
-  //           color: valueColor.withOpacity(0.1),
-  //           borderRadius: BorderRadius.circular(8),
-  //           border: Border.all(
-  //             color: valueColor.withOpacity(0.3),
-  //           ),
-  //         ),
-  //         child: Text(
-  //           value,
-  //           style: TextStyle(
-  //             fontWeight: FontWeight.w600,
-  //             color: valueColor,
-  //             fontSize: 14,
-  //           ),
-  //         ),
-  //       ),
-  //     ],
-  //   );
-  // }
+ 
 
  
 
@@ -582,21 +516,18 @@ class SimpleConnectionIndicator extends StatelessWidget {
           return const SizedBox.shrink();
         }
 
-        final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
         return Container(
           width: double.infinity,
           margin: const EdgeInsets.all(16),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: isDarkMode 
-                ? Colors.red.shade900.withOpacity(0.9)
-                : Colors.red.shade50,
+            color: Colors.red.shade900.withOpacity(0.9)
+              ,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isDarkMode 
-                  ? Colors.red.shade700.withOpacity(0.6)
-                  : Colors.red.shade200,
+              color: Colors.red.shade700.withOpacity(0.6)
+             
             ),
             boxShadow: [
               BoxShadow(
@@ -611,14 +542,14 @@ class SimpleConnectionIndicator extends StatelessWidget {
             children: [
               Icon(
                 Icons.wifi_off_rounded,
-                color: isDarkMode ? Colors.red.shade300 : Colors.red.shade600,
+                color: Colors.red.shade300 ,
                 size: 18,
               ),
               const SizedBox(width: 12),
               Text(
                 'No Internet Connection',
                 style: TextStyle(
-                  color: isDarkMode ? Colors.red.shade300 : Colors.red.shade600,
+                  color: Colors.red.shade300,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 0.3,

@@ -43,11 +43,10 @@ class _SheetModalState extends State<SheetModal> {
       return _buildEmptySheet(context);
     }
 
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       decoration: BoxDecoration(
-        color: isDarkMode ? Colors.black : Colors.white,
+        color:  Colors.black ,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(20),
           topRight: Radius.circular(20),
@@ -59,7 +58,7 @@ class _SheetModalState extends State<SheetModal> {
           const SizedBox(height: 20),
           _buildSheetActions(context, config),
           const SizedBox(height: 30),
-          _buildCloseButton(context, isDarkMode),
+          _buildCloseButton(context),
           const SizedBox(height: 30),
         ],
       ),
@@ -98,7 +97,7 @@ class _SheetModalState extends State<SheetModal> {
     );
   }
 
-  Widget _buildCloseButton(BuildContext context, bool isDarkMode) {
+  Widget _buildCloseButton(BuildContext context) {
     return GestureDetector(
       onTap: () {
         // NOTIFY REFRESH MANAGER THAT SHEET IS CLOSING
@@ -110,23 +109,22 @@ class _SheetModalState extends State<SheetModal> {
         width: 50,
         height: 50,
         decoration: BoxDecoration(
-          color: isDarkMode ? Colors.white : Colors.black,
+          color:  Colors.white ,
           shape: BoxShape.circle,
         ),
         child: Icon(
           Icons.close,
-          color: isDarkMode ? Colors.black : Colors.white,
+          color:  Colors.black ,
         ),
       ),
     );
   }
 
   Widget _buildEmptySheet(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     
     return Container(
       decoration: BoxDecoration(
-        color: isDarkMode ? Colors.black : Colors.white,
+        color:  Colors.black ,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(20),
           topRight: Radius.circular(20),
@@ -139,7 +137,7 @@ class _SheetModalState extends State<SheetModal> {
           Icon(
             Icons.info_outline,
             size: 48,
-            color: isDarkMode ? Colors.white : Colors.black,
+            color:  Colors.white ,
           ),
           const SizedBox(height: 16),
           Text(
@@ -147,11 +145,11 @@ class _SheetModalState extends State<SheetModal> {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w500,
-              color: isDarkMode ? Colors.white : Colors.black,
+              color:  Colors.white ,
             ),
           ),
           const SizedBox(height: 30),
-          _buildCloseButton(context, isDarkMode),
+          _buildCloseButton(context, ),
         ],
       ),
     );
