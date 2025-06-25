@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 
 import 'package:MUJEER/services/config_service.dart';
 import 'package:MUJEER/services/webview_service.dart';
@@ -22,50 +23,55 @@ class DynamicBottomNavigation extends StatelessWidget {
     if (config == null) return const SizedBox.shrink();
     
     final primaryColor = _parseColorFromConfig(config.theme.primaryColor);
-        debugPrint('color nav bar $primaryColor');
 
+    return KeyboardVisibilityBuilder(
+      builder: (context, isKeyboardVisible) {
+        if (isKeyboardVisible) {
+          return const SizedBox.shrink();
+        }
 
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E1E1E),
-     
-      ),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8),
-          child: GNav(
-            rippleColor: Colors.grey[800]!,
-            hoverColor: Colors.grey[700]!,
-            haptic: true,
-            tabBorderRadius: 25,
-            tabActiveBorder: Border.all(
-              color: primaryColor,
-              width: 1,
-            ),
-            tabBorder: Border.all(color: Colors.transparent, width: 1),
-            curve: Curves.easeIn,
-            duration: const Duration(milliseconds: 200),
-            gap: 8,
-            color: Colors.white,
-            activeColor: primaryColor,
-            iconSize: 24,
-            tabBackgroundColor: primaryColor.withOpacity(0.2),
-            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-            selectedIndex: selectedIndex,
-            onTabChange: (index) {
-              HapticFeedback.lightImpact();
-              final item = config.mainIcons[index];
-              _onItemTapped(context, index, item);
-            },
-            tabs: _buildNavigationTabs(
-              context,
-              config,
-              primaryColor,
-              Colors.white,
+        return Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E1E1E),
+          ),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8),
+              child: GNav(
+                rippleColor: Colors.grey[800]!,
+                hoverColor: Colors.grey[700]!,
+                haptic: true,
+                tabBorderRadius: 25,
+                tabActiveBorder: Border.all(
+                  color: primaryColor,
+                  width: 1,
+                ),
+                tabBorder: Border.all(color: Colors.transparent, width: 1),
+                curve: Curves.easeIn,
+                duration: const Duration(milliseconds: 200),
+                gap: 8,
+                color: Colors.white,
+                activeColor: primaryColor,
+                iconSize: 24,
+                tabBackgroundColor: primaryColor.withOpacity(0.2),
+                padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+                selectedIndex: selectedIndex,
+                onTabChange: (index) {
+                  HapticFeedback.lightImpact();
+                  final item = config.mainIcons[index];
+                  _onItemTapped(context, index, item);
+                },
+                tabs: _buildNavigationTabs(
+                  context,
+                  config,
+                  primaryColor,
+                  Colors.white,
+                ),
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -86,7 +92,7 @@ class DynamicBottomNavigation extends StatelessWidget {
         return Color(int.parse(cleanColor, radix: 16));
       }
     } catch (e) {
-      return const Color.fromARGB(255, 255, 255, 255); // default fallback
+      return const Color.fromARGB(255, 255, 255, 255); 
     }
   }
 
