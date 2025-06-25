@@ -7,6 +7,7 @@ import 'package:MUJEER/widgets/header_icon_widget.dart';
 
 class DynamicAppBar extends StatelessWidget implements PreferredSizeWidget {
   final int selectedIndex;
+
   const DynamicAppBar({super.key, required this.selectedIndex});
 
   @override
@@ -32,20 +33,16 @@ class DynamicAppBar extends StatelessWidget implements PreferredSizeWidget {
 
     return AppBar(
       centerTitle: true,
-      leading:
-          firstHeaderIcon != null
-              ? HeaderIconWidget(
-                iconUrl: firstHeaderIcon.icon,
-                title: firstHeaderIcon.title,
-                size: 24,
-                onTap: () => _handleHeaderIconTap(context, firstHeaderIcon),
-              )
-              : null,
+      // Put remaining icons (all except first) in leading as a list
+      leading: remainingHeaderIcons.isNotEmpty
+          ? _buildLeadingList(context, remainingHeaderIcons)
+          : null,
       title: Padding(
         padding: const EdgeInsets.only(right: 10.0),
         child: _buildTitle(context, currentItem.title, titleColor),
       ),
-      actions: _buildActions(context, remainingHeaderIcons),
+      // Put first icon in actions
+      actions: _buildActions(context, firstHeaderIcon),
       backgroundColor: const Color(0xFF1E1E1E),
       elevation: 0,
       iconTheme: IconThemeData(color: titleColor),
@@ -63,24 +60,57 @@ class DynamicAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  List<Widget> _buildActions(BuildContext context, List<dynamic> headerIcons) {
-    final List<Widget> actions = [];
-
-    for (final headerIcon in headerIcons) {
-      actions.add(
-        HeaderIconWidget(
-          iconUrl: headerIcon.icon,
-          title: headerIcon.title,
-          size: 24,
-          onTap: () => _handleHeaderIconTap(context, headerIcon),
-        ),
+  // Build leading widget as a list for remaining icons (all except first)
+  Widget? _buildLeadingList(BuildContext context, List<dynamic> remainingIcons) {
+    if (remainingIcons.isEmpty) return null;
+    
+    // If there's only one remaining icon, return it directly
+    if (remainingIcons.length == 1) {
+      final headerIcon = remainingIcons.first;
+      return HeaderIconWidget(
+        iconUrl: headerIcon.icon,
+        title: headerIcon.title,
+        size: 24,
+        onTap: () => _handleHeaderIconTap(context, headerIcon),
       );
     }
+    
+    // If there are multiple remaining icons, show them in a Row
+    return Container(
+      padding: const EdgeInsets.only(left: 8.0),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: remainingIcons.map<Widget>((headerIcon) {
+          return Padding(
+            padding: const EdgeInsets.only(right: 4.0),
+            child: HeaderIconWidget(
+              iconUrl: headerIcon.icon,
+              title: headerIcon.title,
+              size: 20, // Slightly smaller for multiple icons
+              onTap: () => _handleHeaderIconTap(context, headerIcon),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
 
-    if (actions.isNotEmpty) {
+  // Build actions for first icon only
+  List<Widget> _buildActions(BuildContext context, dynamic firstHeaderIcon) {
+    final List<Widget> actions = [];
+    
+    if (firstHeaderIcon != null) {
+      actions.add(
+        HeaderIconWidget(
+          iconUrl: firstHeaderIcon.icon,
+          title: firstHeaderIcon.title,
+          size: 24,
+          onTap: () => _handleHeaderIconTap(context, firstHeaderIcon),
+        ),
+      );
       actions.add(const SizedBox(width: 8));
     }
-
+    
     return actions;
   }
 

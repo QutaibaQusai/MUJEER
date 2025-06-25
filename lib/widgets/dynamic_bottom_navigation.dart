@@ -28,13 +28,7 @@ class DynamicBottomNavigation extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFF1E1E1E),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
+     
       ),
       child: SafeArea(
         child: Padding(
