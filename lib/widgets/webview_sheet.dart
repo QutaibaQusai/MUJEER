@@ -465,30 +465,6 @@ void _handleNewWebNavigation(String fullUrl) {
     );
   }
 }
-  void _handleSheetNavigation(String url) {
-    debugPrint('📋 Opening new sheet from current sheet: $url');
-
-    String targetUrl = widget.url; // Use current URL as default
-
-    if (url.contains('?url=')) {
-      try {
-        Uri uri = Uri.parse(url.replaceFirst('new-sheet://', 'https://'));
-        if (uri.queryParameters.containsKey('url')) {
-          targetUrl = uri.queryParameters['url']!;
-        }
-      } catch (e) {
-        debugPrint('❌ Error parsing URL parameters: $e');
-      }
-    }
-
-    // Open another sheet
-    WebViewService().navigate(
-      context,
-      url: targetUrl,
-      linkType: 'sheet_webview',
-      title: widget.title,
-    );
-  }
 
   void _showUrlError(String message) {
     if (mounted) {

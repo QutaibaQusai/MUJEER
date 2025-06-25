@@ -202,31 +202,7 @@ class _MainScreenState extends State<MainScreen>
     }
   }
 
-  Future<void> _checkAndRestoreIfNeeded() async {
-    try {
-      // Small delay to ensure app is fully resumed
-      await Future.delayed(Duration(milliseconds: 500));
-
-      if (!mounted) return;
-
-      // Check if current WebView has content
-      final hasContent = await _checkWebViewHasContent(_selectedIndex);
-
-      if (!hasContent) {
-        debugPrint('🔄 WebView is empty - refreshing current tab');
-        await _refreshCurrentTab();
-      } else {
-        debugPrint('✅ WebView has content - no refresh needed');
-        // Just restore scroll position if content is there
-        _restoreScrollPosition(_selectedIndex);
-      }
-    } catch (e) {
-      debugPrint('❌ Error checking restoration need: $e');
-      // If check fails, refresh to be safe
-      await _refreshCurrentTab();
-    }
-  }
-
+ 
   Future<bool> _checkWebViewHasContent(int tabIndex) async {
     try {
       final controller = _controllerManager.getController(
@@ -279,151 +255,8 @@ class _MainScreenState extends State<MainScreen>
     }
   }
 
-  Future<void> _refreshCurrentTab() async {
-    try {
-      debugPrint('🔄 Refreshing current tab $_selectedIndex');
 
-      setState(() {
-        _loadingStates[_selectedIndex] = true;
-      });
-
-      final controller = _controllerManager.getController(
-        _selectedIndex,
-        '',
-        context,
-      );
-      await controller.reload();
-
-      // Loading state will be updated by the navigation delegate
-      debugPrint('✅ Tab refresh initiated');
-    } catch (e) {
-      debugPrint('❌ Error refreshing tab: $e');
-      if (mounted) {
-        setState(() {
-          _loadingStates[_selectedIndex] = false;
-        });
-      }
-    }
-  }
-
-  void _restoreScrollPosition(int tabIndex) {
-    try {
-      final controller = _controllerManager.getController(
-        tabIndex,
-        '',
-        context,
-      );
-
-      controller.runJavaScript('''
-      try {
-        if (window.savedAppState && window.savedAppState.scrollX !== undefined) {
-          // Small delay to ensure page is ready
-          setTimeout(() => {
-            window.scrollTo(window.savedAppState.scrollX, window.savedAppState.scrollY);
-            console.log('📍 Scroll position restored:', window.savedAppState.scrollX, window.savedAppState.scrollY);
-          }, 300);
-        }
-      } catch (error) {
-        console.error('❌ Error restoring scroll:', error);
-      }
-    ''');
-    } catch (e) {
-      debugPrint('❌ Error restoring scroll position: $e');
-    }
-  }
-
-  Future<void> _checkBackgroundTabs() async {
-    final config = _configService.config;
-    if (config == null) return;
-
-    for (int i = 0; i < config.mainIcons.length; i++) {
-      if (i != _selectedIndex &&
-          config.mainIcons[i].linkType != 'sheet_webview') {
-        // Check with delay to avoid overwhelming the system
-        Future.delayed(Duration(seconds: i * 2), () async {
-          if (mounted) {
-            final hasContent = await _checkWebViewHasContent(i);
-            if (!hasContent) {
-              debugPrint(
-                '🔄 Background tab $i needs refresh - will refresh when accessed',
-              );
-              // Mark for refresh when user switches to this tab
-              _loadingStates[i] = true;
-            }
-          }
-        });
-      }
-    }
-  }
-
-  void _restoreWebViewState() async {
-    try {
-      // Small delay to ensure app is fully resumed
-      await Future.delayed(Duration(milliseconds: 300));
-
-      if (!mounted) return;
-
-      final config = _configService.config;
-      if (config == null || _selectedIndex >= config.mainIcons.length) return;
-
-      final controller = _controllerManager.getController(
-        _selectedIndex,
-        '',
-        context,
-      );
-
-      // Restore scroll position and check if content is still there
-      controller.runJavaScript('''
-      try {
-        // Check if page content is still available
-        const hasContent = document.body && document.body.children.length > 0;
-        
-        if (!hasContent) {
-          console.log('⚠️ Page content missing - may need reload');
-          // Don't auto-reload - let user decide
-          return;
-        }
-        
-        // Restore scroll position if saved
-        if (window.savedScrollPosition) {
-          const saved = window.savedScrollPosition;
-          const timeDiff = Date.now() - saved.timestamp;
-          
-          // Only restore if not too old (within 5 minutes)
-          if (timeDiff < 300000) {
-            window.scrollTo(saved.x, saved.y);
-            console.log('✅ Scroll position restored:', saved);
-          } else {
-            console.log('⏰ Saved position too old, ignoring');
-          }
-        }
-        
-        // Re-initialize any JavaScript that might have been lost
-        if (typeof window.ERPForever !== 'undefined') {
-          console.log('✅ ERPForever JavaScript still available');
-        } else {
-          console.log('⚠️ ERPForever JavaScript missing - may need page interaction');
-        }
-        
-      } catch (e) {
-        console.error('❌ Error restoring state:', e);
-      }
-    ''');
-
-      // Update UI state without forcing refresh
-      setState(() {
-        // Keep current loading state - don't force loading
-        // _loadingStates[_selectedIndex] = _loadingStates[_selectedIndex] ?? false;
-      });
-
-      debugPrint(
-        '✅ WebView state restoration attempted for tab $_selectedIndex',
-      );
-    } catch (e) {
-      debugPrint('❌ Error restoring WebView state: $e');
-    }
-  }
-
+ 
   void _initializeLoadingStates() {
     final config = _configService.config;
     if (config != null && config.mainIcons.isNotEmpty) {
@@ -535,58 +368,7 @@ class _MainScreenState extends State<MainScreen>
     );
   }
 
-  // 🆕 NEW: Setup controller for preloaded tabs
-  void _setupTabController(WebViewController controller, int index, mainIcon) {
-    controller.setNavigationDelegate(
-      NavigationDelegate(
-        onPageStarted: (String url) {
-          debugPrint('🔄 Preloaded tab $index started loading: $url');
-          if (mounted) {
-            setState(() {
-              _loadingStates[index] = true;
-              _isAtTopStates[index] = true;
-            });
-          }
-        },
-        onPageFinished: (String url) {
-          debugPrint('✅ Preloaded tab $index finished loading: $url');
-
-          if (mounted) {
-            setState(() {
-              _loadingStates[index] = false;
-            });
-          }
-
-          // Setup JavaScript for preloaded tabs
-          _injectScrollMonitoring(controller, index);
-
-          // Add native pull-to-refresh after page loads
-          Future.delayed(const Duration(milliseconds: 800), () {
-            _injectNativePullToRefresh(controller, index);
-          });
-
-          debugPrint(
-            '🎯 Tab $index (${mainIcon.title}) is now ready for instant switching!',
-          );
-        },
-        onWebResourceError: (WebResourceError error) {
-          debugPrint(
-            '❌ WebResource error for preloaded tab $index: ${error.description}',
-          );
-          if (mounted) {
-            setState(() {
-              _loadingStates[index] = false;
-            });
-          }
-        },
-        onNavigationRequest: (NavigationRequest request) {
-          WebViewService().updateController(controller, context);
-          return _handleNavigationRequest(request);
-        },
-      ),
-    );
-  }
-
+ 
   @override
   Widget build(BuildContext context) {
     return Consumer2<ConfigService, InternetConnectionService>(
@@ -1869,27 +1651,6 @@ void _handleNewWebNavigation(String fullUrl) {
   }
 }
 
-  void _handleSheetNavigation(String url) {
-    String targetUrl = 'https://mujeer.com';
-
-    if (url.contains('?')) {
-      try {
-        Uri uri = Uri.parse(url.replaceFirst('new-sheet://', 'https://'));
-        if (uri.queryParameters.containsKey('url')) {
-          targetUrl = uri.queryParameters['url']!;
-        }
-      } catch (e) {
-        debugPrint("Error parsing URL parameters: $e");
-      }
-    }
-
-    WebViewService().navigate(
-      context,
-      url: targetUrl,
-      linkType: 'sheet_webview',
-      title: 'Web View',
-    );
-  }
 
   void _handleBarcodeScanning(String url) {
     debugPrint("Barcode scanning triggered: $url");

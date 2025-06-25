@@ -8,7 +8,6 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:MUJEER/services/webview_service.dart';
-import 'package:MUJEER/widgets/loading_widget.dart';
 
 class WebViewPage extends StatefulWidget {
   final String url;
@@ -1017,36 +1016,7 @@ void _handleSheetNavigationFixed(String fullUrl) {
   }
 }
 
-  // Handle new-sheet:// navigation - Open CURRENT page in sheet
-  void _handleSheetNavigation(String url) {
-    debugPrint('📋 WebViewPage: Opening current page in sheet: $url');
-
-    // Use the CURRENT page URL instead of parsing the new-sheet:// URL
-    String targetUrl = widget.url; // Use the current WebViewPage URL
-
-    // Only parse parameters if you want to override the current URL
-    if (url.contains('?url=')) {
-      try {
-        Uri uri = Uri.parse(url.replaceFirst('new-sheet://', 'https://'));
-        if (uri.queryParameters.containsKey('url')) {
-          targetUrl = uri.queryParameters['url']!;
-        }
-      } catch (e) {
-        debugPrint('❌ Error parsing URL parameters: $e');
-      }
-    }
-
-    debugPrint('📋 WebViewPage: Opening sheet with CURRENT URL: $targetUrl');
-
-    // Use WebViewService to open the CURRENT page in sheet format
-    WebViewService().navigate(
-      context,
-      url: targetUrl,
-      linkType: 'sheet_webview',
-      title: widget.title, // Use current page title
-    );
-  }
-
+ 
   void _injectScrollMonitoring() {
     _controller.runJavaScript('''
       (function() {

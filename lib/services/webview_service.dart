@@ -2,10 +2,8 @@
 import 'dart:convert';
 
 import 'package:MUJEER/services/app_data_service.dart';
-import 'package:MUJEER/services/config_service.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:provider/provider.dart';
 import 'package:MUJEER/models/link_types.dart';
 import 'package:MUJEER/pages/webview_page.dart';
 import 'package:MUJEER/pages/barcode_scanner_page.dart';
