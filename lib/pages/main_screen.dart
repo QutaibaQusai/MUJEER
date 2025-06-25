@@ -1087,86 +1087,149 @@ class _MainScreenState extends State<MainScreen>
       _channelAdded[index] = false;
     }
   }
+// In main_screen.dart - REPLACE _handleNavigationRequest method completely
 
-  NavigationDecision _handleNavigationRequest(NavigationRequest request) {
-    debugPrint("Navigation request: ${request.url}");
+NavigationDecision _handleNavigationRequest(NavigationRequest request) {
+  debugPrint("Navigation request: ${request.url}");
 
-    // NEW: Handle external URLs with ?external=1 parameter
-    if (request.url.contains('?external=1')) {
-      _handleExternalNavigation(request.url);
-      return NavigationDecision.prevent;
-    }
-    if (request.url.startsWith('toast://')) {
-      _handleToastRequest(request.url);
-      return NavigationDecision.prevent;
-    }
-
-    // NEW: Handle external URLs with ?external=1 parameter
-    if (request.url.contains('?external=1')) {
-      _handleExternalNavigation(request.url);
-      return NavigationDecision.prevent;
-    }
-
-    if (request.url.startsWith('get-location://')) {
-      _handleLocationRequest();
-      return NavigationDecision.prevent;
-    }
-
-    // Contacts requests
-    if (request.url.startsWith('get-contacts')) {
-      _handleContactsRequest();
-      return NavigationDecision.prevent;
-    }
-
-    // Other navigation requests
-    if (request.url.startsWith('new-web://')) {
-      _handleNewWebNavigation(request.url);
-      return NavigationDecision.prevent;
-    }
-
-    if (request.url.startsWith('new-sheet://')) {
-      _handleSheetNavigation(request.url);
-      return NavigationDecision.prevent;
-    }
-
-    // NEW: Handle continuous barcode scanning
-    if (request.url.startsWith('continuous-barcode://')) {
-      _handleContinuousBarcodeScanning(request.url);
-      return NavigationDecision.prevent;
-    }
-
-    // Regular barcode requests
-    if (request.url.contains('barcode') || request.url.contains('scan')) {
-      _handleBarcodeScanning(request.url);
-      return NavigationDecision.prevent;
-    }
-
-    if (request.url.startsWith('take-screenshot://')) {
-      _handleScreenshotRequest();
-      return NavigationDecision.prevent;
-    }
-
-    // Image save requests
-    if (request.url.startsWith('save-image://')) {
-      _handleImageSaveRequest(request.url);
-      return NavigationDecision.prevent;
-    }
-
-    if (request.url.startsWith('save-pdf://')) {
-      _handlePdfSaveRequest(request.url);
-      return NavigationDecision.prevent;
-    }
-
-    if (request.url.startsWith('alert://') ||
-        request.url.startsWith('confirm://') ||
-        request.url.startsWith('prompt://')) {
-      _handleAlertRequest(request.url);
-      return NavigationDecision.prevent;
-    }
-
-    return NavigationDecision.navigate;
+  // PRIORITY: Handle new-sheet:// requests - FIXED
+  if (request.url.startsWith('new-sheet://')) {
+    _handleSheetNavigationFixed(request.url);
+    return NavigationDecision.prevent;
   }
 
+  // PRIORITY: Handle new-web:// requests - FIXED
+  if (request.url.startsWith('new-web://')) {
+    _handleNewWebNavigation(request.url);
+    return NavigationDecision.prevent;
+  }
+
+  // Handle external URLs with ?external=1 parameter
+  if (request.url.contains('?external=1')) {
+    _handleExternalNavigation(request.url);
+    return NavigationDecision.prevent;
+  }
+
+  if (request.url.startsWith('toast://')) {
+    _handleToastRequest(request.url);
+    return NavigationDecision.prevent;
+  }
+
+  if (request.url.startsWith('get-location://')) {
+    _handleLocationRequest();
+    return NavigationDecision.prevent;
+  }
+
+  // Contacts requests
+  if (request.url.startsWith('get-contacts')) {
+    _handleContactsRequest();
+    return NavigationDecision.prevent;
+  }
+
+  // NEW: Handle continuous barcode scanning
+  if (request.url.startsWith('continuous-barcode://')) {
+    _handleContinuousBarcodeScanning(request.url);
+    return NavigationDecision.prevent;
+  }
+
+  // Regular barcode requests
+  if (request.url.contains('barcode') || request.url.contains('scan')) {
+    _handleBarcodeScanning(request.url);
+    return NavigationDecision.prevent;
+  }
+
+  if (request.url.startsWith('take-screenshot://')) {
+    _handleScreenshotRequest();
+    return NavigationDecision.prevent;
+  }
+
+  // Image save requests
+  if (request.url.startsWith('save-image://')) {
+    _handleImageSaveRequest(request.url);
+    return NavigationDecision.prevent;
+  }
+
+  if (request.url.startsWith('save-pdf://')) {
+    _handlePdfSaveRequest(request.url);
+    return NavigationDecision.prevent;
+  }
+
+  if (request.url.startsWith('alert://') ||
+      request.url.startsWith('confirm://') ||
+      request.url.startsWith('prompt://')) {
+    _handleAlertRequest(request.url);
+    return NavigationDecision.prevent;
+  }
+
+  return NavigationDecision.navigate;
+}
+void _handleSheetNavigationFixed(String fullUrl) {
+  debugPrint('📋 MainScreen: Processing new-sheet request: $fullUrl');
+
+  try {
+    // Step 1: URL decode the entire string first
+    String decodedUrl = Uri.decodeComponent(fullUrl);
+    debugPrint('📋 MainScreen Decoded URL: $decodedUrl');
+    
+    // Step 2: Remove the new-sheet:// protocol
+    String cleanUrl = decodedUrl.replaceFirst('new-sheet://', '');
+    
+    String targetUrl = '';
+    String title = 'Web View'; // Default title
+    
+    // Step 3: Check if there's a title separated by semicolon
+    if (cleanUrl.contains(';')) {
+      List<String> parts = cleanUrl.split(';');
+      targetUrl = parts[0].trim();
+      
+      // Extract title if provided
+      if (parts.length > 1) {
+        title = parts[1].trim();
+        // Remove "Title" prefix if exists
+        if (title.toLowerCase().startsWith('title ')) {
+          title = title.substring(6).trim();
+        }
+      }
+    } else {
+      // No title separator, use entire clean URL
+      targetUrl = cleanUrl.trim();
+    }
+
+    // Step 4: Fix common URL issues
+    // Fix missing colon in https//
+    if (targetUrl.startsWith('https//')) {
+      targetUrl = targetUrl.replaceFirst('https//', 'https://');
+      debugPrint('📋 MainScreen Fixed https:// - URL: $targetUrl');
+    }
+    // Fix missing colon in http//
+    if (targetUrl.startsWith('http//')) {
+      targetUrl = targetUrl.replaceFirst('http//', 'http://');
+      debugPrint('📋 MainScreen Fixed http:// - URL: $targetUrl');
+    }
+
+    debugPrint('📋 MainScreen Final parsed - URL: $targetUrl, Title: $title');
+
+    // Step 5: Validate URL
+    if (targetUrl.isEmpty || (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://'))) {
+      debugPrint('❌ MainScreen Invalid URL for sheet navigation: $targetUrl');
+      debugPrint('❌ URL must start with http:// or https://');
+      return;
+    }
+
+    debugPrint('✅ MainScreen Opening sheet - URL: $targetUrl, Title: $title');
+
+    // Step 6: Navigate using WebViewService - Use context from MainScreen
+    WebViewService().navigate(
+      context,
+      url: targetUrl,
+      linkType: 'sheet_webview',
+      title: title,
+    );
+
+  } catch (e) {
+    debugPrint('❌ MainScreen Error handling sheet navigation: $e');
+  }
+}
   void _handleToastRequest(String url) {
     debugPrint('🍞 Toast requested from WebView: $url');
 
@@ -1733,27 +1796,78 @@ class _MainScreenState extends State<MainScreen>
   ''');
   }
 
-  void _handleNewWebNavigation(String url) {
-    String targetUrl = 'https://mobile.erpforever.com/';
+void _handleNewWebNavigation(String fullUrl) {
+  debugPrint('🌐 MainScreen: Processing new-web request: $fullUrl');
 
-    if (url.contains('?')) {
-      try {
-        Uri uri = Uri.parse(url.replaceFirst('new-web://', 'https://'));
-        if (uri.queryParameters.containsKey('url')) {
-          targetUrl = uri.queryParameters['url']!;
+  try {
+    // Step 1: URL decode the entire string first
+    String decodedUrl = Uri.decodeComponent(fullUrl);
+    debugPrint('🌐 MainScreen Decoded URL: $decodedUrl');
+    
+    // Step 2: Remove the new-web:// protocol
+    String cleanUrl = decodedUrl.replaceFirst('new-web://', '');
+    
+    String targetUrl = '';
+    String title = 'Web View'; // Default title
+    
+    // Step 3: Check if there's a title separated by semicolon
+    if (cleanUrl.contains(';')) {
+      List<String> parts = cleanUrl.split(';');
+      targetUrl = parts[0].trim();
+      
+      // Extract title if provided
+      if (parts.length > 1) {
+        title = parts[1].trim();
+        // Remove "Title" prefix if exists
+        if (title.toLowerCase().startsWith('title ')) {
+          title = title.substring(6).trim();
         }
-      } catch (e) {
-        debugPrint("Error parsing URL parameters: $e");
       }
+    } else {
+      // No title separator, use entire clean URL
+      targetUrl = cleanUrl.trim();
     }
 
+    // Step 4: Fix common URL issues
+    // Fix missing colon in https//
+    if (targetUrl.startsWith('https//')) {
+      targetUrl = targetUrl.replaceFirst('https//', 'https://');
+      debugPrint('🌐 MainScreen Fixed https:// - URL: $targetUrl');
+    }
+    // Fix missing colon in http//
+    if (targetUrl.startsWith('http//')) {
+      targetUrl = targetUrl.replaceFirst('http//', 'http://');
+      debugPrint('🌐 MainScreen Fixed http:// - URL: $targetUrl');
+    }
+
+    // Step 5: Use fallback URL if empty
+    if (targetUrl.isEmpty) {
+      targetUrl = 'https://mobile.erpforever.com/';
+      debugPrint('🌐 MainScreen Using fallback URL: $targetUrl');
+    }
+
+    debugPrint('🌐 MainScreen Final parsed - URL: $targetUrl, Title: $title');
+    debugPrint('✅ MainScreen Opening WebView page - URL: $targetUrl, Title: $title');
+
+    // Step 6: Navigate to WebViewPage
     WebViewService().navigate(
       context,
       url: targetUrl,
       linkType: 'regular_webview',
+      title: title,
+    );
+
+  } catch (e) {
+    debugPrint('❌ MainScreen Error handling new-web navigation: $e');
+    // Fallback navigation
+    WebViewService().navigate(
+      context,
+      url: 'https://mobile.erpforever.com/',
+      linkType: 'regular_webview',
       title: 'Web View',
     );
   }
+}
 
   void _handleSheetNavigation(String url) {
     String targetUrl = 'https://mujeer.com';

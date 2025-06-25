@@ -159,54 +159,124 @@ class _WebViewSheetState extends State<WebViewSheet> {
     _startLoadingMonitor();
   }
 
-  // ADD THIS METHOD - Same as WebViewPage
-  NavigationDecision _handleNavigationRequest(NavigationRequest request) {
-    debugPrint('🔍 Handling navigation in WebViewPage: ${request.url}');
 
-    // PRIORITY: Handle external URLs with ?external=1 parameter
-    if (request.url.contains('?external=1')) {
-      _handleExternalNavigation(request.url);
-      return NavigationDecision.prevent;
-    }
+NavigationDecision _handleNavigationRequest(NavigationRequest request) {
+  debugPrint('🔍 Sheet Navigation request: ${request.url}');
 
-    // Handle new-web:// requests - PREVENT and open new WebView layer
-    if (request.url.startsWith('new-web://')) {
-      _handleNewWebNavigation(request.url);
-      return NavigationDecision.prevent;
-    }
-    if (request.url.startsWith('toast://')) {
-      _handleToastRequest(request.url);
-      return NavigationDecision.prevent;
-    }
-    if (request.url.startsWith('new-sheet://')) {
-      _handleSheetNavigation(request.url);
-      return NavigationDecision.prevent;
-    }
-
-   
-
-    if (request.url.startsWith('dark-mode://') ||
-        request.url.startsWith('light-mode://') ||
-        request.url.startsWith('system-mode://') ||
-        request.url.startsWith('logout://') ||
-        request.url.startsWith('get-location://') ||
-        request.url.startsWith('get-contacts://') ||
-        request.url.startsWith('take-screenshot://') ||
-        request.url.startsWith('save-image://') ||
-        request.url.startsWith('save-pdf://') ||
-        request.url.startsWith('alert://') ||
-        request.url.startsWith('confirm://') ||
-        request.url.startsWith('prompt://') ||
-        request.url.contains('barcode') ||
-        request.url.contains('scan')) {
-      // These will be handled by the re-injected JavaScript
-      return NavigationDecision.prevent;
-    }
-
-    // Allow normal navigation for other URLs
-    return NavigationDecision.navigate;
+  // PRIORITY: Handle new-sheet:// requests - FIXED FOR LAYERED SHEETS
+  if (request.url.startsWith('new-sheet://')) {
+    _handleSheetNavigationFixed(request.url);
+    return NavigationDecision.prevent;
   }
 
+  // PRIORITY: Handle external URLs with ?external=1 parameter
+  if (request.url.contains('?external=1')) {
+    _handleExternalNavigation(request.url);
+    return NavigationDecision.prevent;
+  }
+
+  // Handle new-web:// requests - PREVENT and open new WebView layer
+  if (request.url.startsWith('new-web://')) {
+    _handleNewWebNavigation(request.url);
+    return NavigationDecision.prevent;
+  }
+
+  if (request.url.startsWith('toast://')) {
+    _handleToastRequest(request.url);
+    return NavigationDecision.prevent;
+  }
+
+  // Rest of existing handlers...
+  if (request.url.startsWith('dark-mode://') ||
+      request.url.startsWith('light-mode://') ||
+      request.url.startsWith('system-mode://') ||
+      request.url.startsWith('logout://') ||
+      request.url.startsWith('get-location://') ||
+      request.url.startsWith('get-contacts://') ||
+      request.url.startsWith('take-screenshot://') ||
+      request.url.startsWith('save-image://') ||
+      request.url.startsWith('save-pdf://') ||
+      request.url.startsWith('alert://') ||
+      request.url.startsWith('confirm://') ||
+      request.url.startsWith('prompt://') ||
+      request.url.contains('barcode') ||
+      request.url.contains('scan')) {
+    return NavigationDecision.prevent;
+  }
+
+  // Allow normal navigation for other URLs
+  return NavigationDecision.navigate;
+}
+
+
+void _handleSheetNavigationFixed(String fullUrl) {
+  debugPrint('📋 WebViewSheet: Processing layered new-sheet request: $fullUrl');
+
+  try {
+    // Step 1: URL decode the entire string first
+    String decodedUrl = Uri.decodeComponent(fullUrl);
+    debugPrint('📋 WebViewSheet Decoded URL: $decodedUrl');
+    
+    // Step 2: Remove the new-sheet:// protocol
+    String cleanUrl = decodedUrl.replaceFirst('new-sheet://', '');
+    
+    String targetUrl = '';
+    String title = 'Web View'; // Default title
+    
+    // Step 3: Check if there's a title separated by semicolon
+    if (cleanUrl.contains(';')) {
+      List<String> parts = cleanUrl.split(';');
+      targetUrl = parts[0].trim();
+      
+      // Extract title if provided
+      if (parts.length > 1) {
+        title = parts[1].trim();
+        // Remove "Title" prefix if exists
+        if (title.toLowerCase().startsWith('title ')) {
+          title = title.substring(6).trim();
+        }
+      }
+    } else {
+      // No title separator, use entire clean URL
+      targetUrl = cleanUrl.trim();
+    }
+
+    // Step 4: Fix common URL issues
+    // Fix missing colon in https//
+    if (targetUrl.startsWith('https//')) {
+      targetUrl = targetUrl.replaceFirst('https//', 'https://');
+      debugPrint('📋 WebViewSheet Fixed https:// - URL: $targetUrl');
+    }
+    // Fix missing colon in http//
+    if (targetUrl.startsWith('http//')) {
+      targetUrl = targetUrl.replaceFirst('http//', 'http://');
+      debugPrint('📋 WebViewSheet Fixed http:// - URL: $targetUrl');
+    }
+
+    debugPrint('📋 WebViewSheet Final parsed - URL: $targetUrl, Title: $title');
+
+    // Step 5: Validate URL
+    if (targetUrl.isEmpty || (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://'))) {
+      debugPrint('❌ WebViewSheet Invalid URL for layered sheet navigation: $targetUrl');
+      debugPrint('❌ URL must start with http:// or https://');
+      return;
+    }
+
+    debugPrint('✅ WebViewSheet Opening LAYERED sheet - URL: $targetUrl, Title: $title');
+
+    // Step 6: Open ANOTHER sheet on top of current sheet using WebViewService
+    WebViewService().navigate(
+      context,
+      url: targetUrl,
+      linkType: 'sheet_webview',
+      title: title,
+    );
+
+  } catch (e) {
+    debugPrint('❌ WebViewSheet Error handling layered sheet navigation: $e');
+  }
+}
+  
   void _handleToastRequest(String url) {
     debugPrint('🍞 Toast requested from WebViewSheet: $url');
 
@@ -316,38 +386,85 @@ class _WebViewSheetState extends State<WebViewSheet> {
     }
   }
 
-  void _handleNewWebNavigation(String url) {
-    debugPrint('🌐 Opening new WebView from sheet: $url');
+void _handleNewWebNavigation(String fullUrl) {
+  debugPrint('🌐 WebViewSheet: Processing new-web request from sheet: $fullUrl');
 
-    String targetUrl = 'https://mobile.erpforever.com/';
-
-    if (url.contains('?')) {
-      try {
-        Uri uri = Uri.parse(url.replaceFirst('new-web://', 'https://'));
-        if (uri.queryParameters.containsKey('url')) {
-          targetUrl = uri.queryParameters['url']!;
+  try {
+    // Step 1: URL decode the entire string first
+    String decodedUrl = Uri.decodeComponent(fullUrl);
+    debugPrint('🌐 WebViewSheet Decoded URL: $decodedUrl');
+    
+    // Step 2: Remove the new-web:// protocol
+    String cleanUrl = decodedUrl.replaceFirst('new-web://', '');
+    
+    String targetUrl = '';
+    String title = 'Web View'; // Default title
+    
+    // Step 3: Check if there's a title separated by semicolon
+    if (cleanUrl.contains(';')) {
+      List<String> parts = cleanUrl.split(';');
+      targetUrl = parts[0].trim();
+      
+      // Extract title if provided
+      if (parts.length > 1) {
+        title = parts[1].trim();
+        // Remove "Title" prefix if exists
+        if (title.toLowerCase().startsWith('title ')) {
+          title = title.substring(6).trim();
         }
-      } catch (e) {
-        debugPrint("Error parsing URL parameters: $e");
       }
+    } else {
+      // No title separator, use entire clean URL
+      targetUrl = cleanUrl.trim();
     }
 
-    // Navigate to another WebViewPage - SAME AS WebViewPage
+    // Step 4: Fix common URL issues
+    // Fix missing colon in https//
+    if (targetUrl.startsWith('https//')) {
+      targetUrl = targetUrl.replaceFirst('https//', 'https://');
+      debugPrint('🌐 WebViewSheet Fixed https:// - URL: $targetUrl');
+    }
+    // Fix missing colon in http//
+    if (targetUrl.startsWith('http//')) {
+      targetUrl = targetUrl.replaceFirst('http//', 'http://');
+      debugPrint('🌐 WebViewSheet Fixed http:// - URL: $targetUrl');
+    }
+
+    // Step 5: Use fallback URL if empty
+    if (targetUrl.isEmpty) {
+      targetUrl = 'https://mobile.erpforever.com/';
+      debugPrint('🌐 WebViewSheet Using fallback URL: $targetUrl');
+    }
+
+    debugPrint('🌐 WebViewSheet Final parsed - URL: $targetUrl, Title: $title');
+    debugPrint('✅ WebViewSheet Opening WebView page from sheet - URL: $targetUrl, Title: $title');
+
+    // Step 6: Navigate to WebViewPage from sheet
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => WebViewPage(url: targetUrl, title: 'Web View'),
+        builder: (context) => WebViewPage(url: targetUrl, title: title),
       ),
     ).then((_) {
-      // When returning from the new WebViewPage, re-register this controller - SAME AS WebViewPage
+      // When returning from the new WebViewPage, re-register this controller
       if (mounted && context.mounted) {
         Future.delayed(const Duration(milliseconds: 100), () {
           WebViewService().pushController(_controller, context, _pageId);
         });
       }
     });
-  }
 
+  } catch (e) {
+    debugPrint('❌ WebViewSheet Error handling new-web navigation: $e');
+    // Fallback navigation
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => WebViewPage(url: 'https://mobile.erpforever.com/', title: 'Web View'),
+      ),
+    );
+  }
+}
   void _handleSheetNavigation(String url) {
     debugPrint('📋 Opening new sheet from current sheet: $url');
 

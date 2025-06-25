@@ -509,59 +509,116 @@ class WebViewService {
     );
     return headers;
   }
+// In webview_service.dart - Replace the _handleNavigationRequest method
 
-  NavigationDecision _handleNavigationRequest(NavigationRequest request) {
-    debugPrint('🔍 Handling navigation request: ${request.url}');
- 
-    if (request.url.startsWith('toast://')) {
-      _handleToastRequest(request.url);
-      return NavigationDecision.prevent;
-    }
-  
-    // Handle location requests
-    else if (request.url.startsWith('get-location://')) {
-      _handleLocationRequest('getCurrentLocation');
-      return NavigationDecision.prevent;
-    }
-    // Handle contacts requests
-    else if (request.url.startsWith('get-contacts://')) {
-      _handleContactsRequest('getAllContacts');
-      return NavigationDecision.prevent;
-    }
-    // Handle screenshot requests
-    else if (request.url.startsWith('take-screenshot://')) {
-      _handleScreenshotRequest('takeScreenshot');
-      return NavigationDecision.prevent;
-    }
-    // Handle image save requests
-    else if (request.url.startsWith('save-image://')) {
-      _handleImageSaveRequest(request.url);
-      return NavigationDecision.prevent;
-    } else if (request.url.startsWith('save-pdf://')) {
-      _handlePdfSaveRequest(request.url);
-      return NavigationDecision.prevent;
-    }
-    // Handle alert requests - ADD THIS SECTION
-    if (request.url.startsWith('alert://')) {
-      _handleAlertRequest(request.url);
-      return NavigationDecision.prevent;
-    } else if (request.url.startsWith('confirm://')) {
-      _handleAlertRequest(request.url);
-      return NavigationDecision.prevent;
-    } else if (request.url.startsWith('prompt://')) {
-      _handleAlertRequest(request.url);
-      return NavigationDecision.prevent;
-    }
-    // Handle barcode requests
-    else if (request.url.contains('barcode') || request.url.contains('scan')) {
-      bool isContinuous = request.url.contains('continuous');
-      _handleBarcodeRequest(isContinuous ? 'scanContinuous' : 'scan');
-      return NavigationDecision.prevent;
-    }
+NavigationDecision _handleNavigationRequest(NavigationRequest request) {
+  debugPrint('🔍 Handling navigation request: ${request.url}');
 
-    return NavigationDecision.navigate;
+  // PRIORITY: Handle new-sheet:// requests - FIXED URL AND TITLE PARSING
+  if (request.url.startsWith('new-sheet://')) {
+    _handleSheetNavigationFixed(request.url);
+    return NavigationDecision.prevent;
   }
 
+  // Handle toast requests
+  if (request.url.startsWith('toast://')) {
+    _handleToastRequest(request.url);
+    return NavigationDecision.prevent;
+  }
+
+  // Handle other protocols...
+  if (request.url.startsWith('alert://') ||
+      request.url.startsWith('confirm://') ||
+      request.url.startsWith('prompt://')) {
+    _handleAlertRequest(request.url);
+    return NavigationDecision.prevent;
+  }
+
+  // Rest of your existing handling...
+  if (request.url.startsWith('get-location://') ||
+      request.url.startsWith('get-contacts://') ||
+      request.url.startsWith('take-screenshot://') ||
+      request.url.startsWith('save-image://') ||
+      request.url.startsWith('save-pdf://') ||
+      request.url.contains('barcode') ||
+      request.url.contains('scan')) {
+    return NavigationDecision.prevent;
+  }
+
+  return NavigationDecision.navigate;
+}
+
+void _handleSheetNavigationFixed(String fullUrl) {
+  debugPrint('📋 WebViewService: Processing new-sheet request: $fullUrl');
+
+  try {
+    // Step 1: URL decode the entire string first
+    String decodedUrl = Uri.decodeComponent(fullUrl);
+    debugPrint('📋 WebViewService Decoded URL: $decodedUrl');
+    
+    // Step 2: Remove the new-sheet:// protocol
+    String cleanUrl = decodedUrl.replaceFirst('new-sheet://', '');
+    
+    String targetUrl = '';
+    String title = 'Web View'; // Default title
+    
+    // Step 3: Check if there's a title separated by semicolon
+    if (cleanUrl.contains(';')) {
+      List<String> parts = cleanUrl.split(';');
+      targetUrl = parts[0].trim();
+      
+      // Extract title if provided
+      if (parts.length > 1) {
+        title = parts[1].trim();
+        // Remove "Title" prefix if exists
+        if (title.toLowerCase().startsWith('title ')) {
+          title = title.substring(6).trim();
+        }
+      }
+    } else {
+      // No title separator, use entire clean URL
+      targetUrl = cleanUrl.trim();
+    }
+
+    // Step 4: Fix common URL issues
+    // Fix missing colon in https//
+    if (targetUrl.startsWith('https//')) {
+      targetUrl = targetUrl.replaceFirst('https//', 'https://');
+      debugPrint('📋 WebViewService Fixed https:// - URL: $targetUrl');
+    }
+    // Fix missing colon in http//
+    if (targetUrl.startsWith('http//')) {
+      targetUrl = targetUrl.replaceFirst('http//', 'http://');
+      debugPrint('📋 WebViewService Fixed http:// - URL: $targetUrl');
+    }
+
+    debugPrint('📋 WebViewService Final parsed - URL: $targetUrl, Title: $title');
+
+    // Step 5: Validate URL
+    if (targetUrl.isEmpty || (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://'))) {
+      debugPrint('❌ WebViewService Invalid URL for sheet navigation: $targetUrl');
+      debugPrint('❌ URL must start with http:// or https://');
+      return;
+    }
+
+    debugPrint('✅ WebViewService Opening sheet - URL: $targetUrl, Title: $title');
+
+    // Step 6: Navigate using WebViewService - Use the current context from stack
+    if (_currentContext != null && _currentContext!.mounted) {
+      navigate(
+        _currentContext!,
+        url: targetUrl,
+        linkType: 'sheet_webview',
+        title: title,
+      );
+    } else {
+      debugPrint('❌ WebViewService: No valid context for sheet navigation');
+    }
+
+  } catch (e) {
+    debugPrint('❌ WebViewService Error handling sheet navigation: $e');
+  }
+}
   void _handleAlertRequest(String message) async {
     if (_currentContext == null) {
       debugPrint('❌ No context available for alert request');
