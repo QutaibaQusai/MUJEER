@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:MUJEER/pages/webview_page.dart';
+import 'package:MUJEER/services/config_service.dart';
 import 'package:MUJEER/services/pull_to_refresh_service.dart';
 import 'package:MUJEER/services/refresh_state_manager.dart';
 import 'package:flutter/material.dart';
@@ -1138,39 +1139,121 @@ class _WebViewSheetState extends State<WebViewSheet> {
   }
 
   Widget _buildLoadingIndicator() {
-    return Container(
-      decoration: BoxDecoration(
-        color: ( Colors.black ),
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(20),
-          bottomRight: Radius.circular(20),
+  return Consumer<ConfigService>(
+    builder: (context, configService, child) {
+      // Get colors from config or use fallbacks
+      final backgroundColor = _getSheetLoadingBackgroundColor(configService);
+      final indicatorColor = _getSheetLoadingIndicatorColor(configService);
+      
+      return Container(
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: const BorderRadius.only(
+            bottomLeft: Radius.circular(20),
+            bottomRight: Radius.circular(20),
+          ),
         ),
-      ),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(
-               Colors.white ,
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(indicatorColor),
+                strokeWidth: 3,
               ),
-              strokeWidth: 3,
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'Loading...',
-              style: TextStyle(
-                color:  Colors.white ,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                letterSpacing: 0.5,
+              const SizedBox(height: 20),
+              Text(
+                'Loading...',
+                style: TextStyle(
+                  color: Colors.white, // Always white on dark background
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 0.5,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    },
+  );
+}
+Color _getSheetLoadingBackgroundColor(ConfigService configService) {
+  try {
+    if (configService.config != null) {
+      // Parse the darkBackground color from config
+      final darkBg = configService.config!.theme.darkBackground;
+      return _hexToColor(darkBg);
+    }
+  } catch (e) {
+    debugPrint('❌ WebViewSheet: Error parsing background color from config: $e');
   }
+  
+  // Fallback to current dark background color
+  return Colors.black;
+}
+
+/// Get indicator color from config with fallback for WebViewSheet
+Color _getSheetLoadingIndicatorColor(ConfigService configService) {
+  try {
+    if (configService.config != null) {
+      // Use primary color for the loading indicator
+      final primaryColor = configService.config!.theme.primaryColor;
+      return _parseColorFromConfig(primaryColor);
+    }
+  } catch (e) {
+    debugPrint('❌ WebViewSheet: Error parsing indicator color from config: $e');
+  }
+  
+  // Fallback to white
+  return Colors.white;
+}
+
+/// Convert hex color string to Color object for WebViewSheet
+Color _hexToColor(String hexColor) {
+  try {
+    String cleanHex = hexColor.trim();
+    
+    // Remove # if present
+    if (cleanHex.startsWith('#')) {
+      cleanHex = cleanHex.substring(1);
+    }
+    
+    // Add alpha if not present (assume full opacity)
+    if (cleanHex.length == 6) {
+      cleanHex = 'FF$cleanHex';
+    }
+    
+    return Color(int.parse(cleanHex, radix: 16));
+  } catch (e) {
+    debugPrint('❌ WebViewSheet: Error parsing hex color $hexColor: $e');
+    return Colors.black; // Fallback
+  }
+}
+
+/// Parse color from config for WebViewSheet (handles both hex and 0x formats)
+Color _parseColorFromConfig(String colorValue) {
+  try {
+    String cleanColor = colorValue.trim();
+
+    if (cleanColor.startsWith('0x')) {
+      // Handle 0x format (like "0xFFFAB510")
+      cleanColor = cleanColor.substring(2);
+      if (cleanColor.length == 6) cleanColor = 'FF$cleanColor';
+      return Color(int.parse(cleanColor, radix: 16));
+    } else if (cleanColor.startsWith('#')) {
+      // Handle hex format (like "#1E1E1E")
+      return _hexToColor(cleanColor);
+    } else {
+      // Handle plain hex (like "FAB510")
+      if (cleanColor.length == 6) cleanColor = 'FF$cleanColor';
+      return Color(int.parse(cleanColor, radix: 16));
+    }
+  } catch (e) {
+    debugPrint('❌ WebViewSheet: Error parsing color $colorValue: $e');
+    return Colors.white; // Fallback
+  }
+}
 
   @override
   void dispose() {
