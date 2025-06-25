@@ -1073,6 +1073,7 @@ if (parts.length > 1) {
       backgroundColor:
           isDarkMode ? const Color(0xFF121212) : const Color(0xFFF5F5F5),
       appBar: AppBar(
+        titleSpacing: 0,
         title: Text(
           widget.title,
           style: GoogleFonts.rubik(
