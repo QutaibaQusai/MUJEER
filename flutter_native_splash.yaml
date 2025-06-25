@@ -1,6 +1,6 @@
 flutter_native_splash:
-  color: "#000000"
-  image: assets/MUJEER_SPLASH_IOS.png
+  color: "#1e1e1e"
+  image: assets/splash_screen/MUJEER_Splash_Screen.png
   android: true
   ios: true
   fullscreen: true
@@ -8,5 +8,5 @@ flutter_native_splash:
   ios_content_mode: center
 
   android_12:
-    image: assets\MUJEER_SPLASH_Android.png
-    color: "#000000"
+    image: assets/splash_screen/MUJEER_Splash_Screen.png
+    color: "#1e1e1e"

@@ -22,6 +22,9 @@ class DynamicAppBar extends StatelessWidget implements PreferredSizeWidget {
 
     final currentItem = config.mainIcons[selectedIndex];
     final titleColor = Colors.white;
+    
+    // Get text direction from config (default to LTR if not specified)
+    final isRTL = config.theme?.direction?.toUpperCase() == 'RTL';
 
     // Check if we have header icons and separate the first one
     final hasHeaderIcons =
@@ -33,16 +36,14 @@ class DynamicAppBar extends StatelessWidget implements PreferredSizeWidget {
 
     return AppBar(
       centerTitle: true,
-      // Put remaining icons (all except first) in leading as a list
-      leading: remainingHeaderIcons.isNotEmpty
-          ? _buildLeadingList(context, remainingHeaderIcons)
-          : null,
+      // Leading positioning based on direction
+      leading: _getLeadingWidget(context, firstHeaderIcon, remainingHeaderIcons, isRTL),
       title: Padding(
         padding: const EdgeInsets.only(right: 10.0),
         child: _buildTitle(context, currentItem.title, titleColor),
       ),
-      // Put first icon in actions
-      actions: _buildActions(context, firstHeaderIcon),
+      // Actions positioning based on direction
+      actions: _getActionsWidget(context, firstHeaderIcon, remainingHeaderIcons, isRTL),
       backgroundColor: const Color(0xFF1E1E1E),
       elevation: 0,
       iconTheme: IconThemeData(color: titleColor),
@@ -60,27 +61,59 @@ class DynamicAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  // Build leading widget as a list for remaining icons (all except first)
-  Widget? _buildLeadingList(BuildContext context, List<dynamic> remainingIcons) {
-    if (remainingIcons.isEmpty) return null;
+  // Get leading widget based on direction
+  Widget? _getLeadingWidget(BuildContext context, dynamic firstHeaderIcon, 
+      List<dynamic> remainingHeaderIcons, bool isRTL) {
+    if (isRTL) {
+      // RTL: First element goes to leading
+      return firstHeaderIcon != null 
+          ? _buildSingleIcon(context, firstHeaderIcon)
+          : null;
+    } else {
+      // LTR: Remaining elements go to leading
+      return remainingHeaderIcons.isNotEmpty
+          ? _buildIconsList(context, remainingHeaderIcons)
+          : null;
+    }
+  }
+
+  // Get actions widget based on direction
+  List<Widget> _getActionsWidget(BuildContext context, dynamic firstHeaderIcon, 
+      List<dynamic> remainingHeaderIcons, bool isRTL) {
+    if (isRTL) {
+      // RTL: Remaining elements go to actions
+      return _buildActionsFromList(context, remainingHeaderIcons);
+    } else {
+      // LTR: First element goes to actions
+      return _buildActionsFromSingle(context, firstHeaderIcon);
+    }
+  }
+
+  // Build single icon widget
+  Widget _buildSingleIcon(BuildContext context, dynamic headerIcon) {
+    return HeaderIconWidget(
+      iconUrl: headerIcon.icon,
+      title: headerIcon.title,
+      size: 24,
+      onTap: () => _handleHeaderIconTap(context, headerIcon),
+    );
+  }
+
+  // Build multiple icons as a list (for leading position)
+  Widget _buildIconsList(BuildContext context, List<dynamic> headerIcons) {
+    if (headerIcons.isEmpty) return const SizedBox.shrink();
     
-    // If there's only one remaining icon, return it directly
-    if (remainingIcons.length == 1) {
-      final headerIcon = remainingIcons.first;
-      return HeaderIconWidget(
-        iconUrl: headerIcon.icon,
-        title: headerIcon.title,
-        size: 24,
-        onTap: () => _handleHeaderIconTap(context, headerIcon),
-      );
+    // If there's only one icon, return it directly
+    if (headerIcons.length == 1) {
+      return _buildSingleIcon(context, headerIcons.first);
     }
     
-    // If there are multiple remaining icons, show them in a Row
+    // If there are multiple icons, show them in a Row
     return Container(
       padding: const EdgeInsets.only(left: 8.0),
       child: Row(
         mainAxisSize: MainAxisSize.min,
-        children: remainingIcons.map<Widget>((headerIcon) {
+        children: headerIcons.map<Widget>((headerIcon) {
           return Padding(
             padding: const EdgeInsets.only(right: 4.0),
             child: HeaderIconWidget(
@@ -95,8 +128,8 @@ class DynamicAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  // Build actions for first icon only
-  List<Widget> _buildActions(BuildContext context, dynamic firstHeaderIcon) {
+  // Build actions from single icon (for LTR)
+  List<Widget> _buildActionsFromSingle(BuildContext context, dynamic firstHeaderIcon) {
     final List<Widget> actions = [];
     
     if (firstHeaderIcon != null) {
@@ -108,6 +141,28 @@ class DynamicAppBar extends StatelessWidget implements PreferredSizeWidget {
           onTap: () => _handleHeaderIconTap(context, firstHeaderIcon),
         ),
       );
+      actions.add(const SizedBox(width: 8));
+    }
+    
+    return actions;
+  }
+
+  // Build actions from list of icons (for RTL)
+  List<Widget> _buildActionsFromList(BuildContext context, List<dynamic> remainingIcons) {
+    final List<Widget> actions = [];
+    
+    for (final headerIcon in remainingIcons) {
+      actions.add(
+        HeaderIconWidget(
+          iconUrl: headerIcon.icon,
+          title: headerIcon.title,
+          size: 24,
+          onTap: () => _handleHeaderIconTap(context, headerIcon),
+        ),
+      );
+    }
+    
+    if (actions.isNotEmpty) {
       actions.add(const SizedBox(width: 8));
     }
     
