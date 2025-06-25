@@ -229,13 +229,10 @@ void _handleSheetNavigationFixed(String fullUrl) {
       targetUrl = parts[0].trim();
       
       // Extract title if provided
-      if (parts.length > 1) {
-        title = parts[1].trim();
-        // Remove "Title" prefix if exists
-        if (title.toLowerCase().startsWith('title ')) {
-          title = title.substring(6).trim();
-        }
-      }
+if (parts.length > 1) {
+  title = parts[1].trim();
+  // ✅ FIXED: Use title exactly as provided
+}
     } else {
       // No title separator, use entire clean URL
       targetUrl = cleanUrl.trim();
@@ -406,13 +403,10 @@ void _handleNewWebNavigation(String fullUrl) {
       targetUrl = parts[0].trim();
       
       // Extract title if provided
-      if (parts.length > 1) {
-        title = parts[1].trim();
-        // Remove "Title" prefix if exists
-        if (title.toLowerCase().startsWith('title ')) {
-          title = title.substring(6).trim();
-        }
-      }
+if (parts.length > 1) {
+  title = parts[1].trim();
+  // ✅ FIXED: Use title exactly as provided
+}
     } else {
       // No title separator, use entire clean URL
       targetUrl = cleanUrl.trim();
